@@ -41,7 +41,7 @@ export const metadata = {
         url: "https://your-deployment-url.vercel.app/preview.png",
         width: 1200,
         height: 630,
-        alt: "LOA-Tabulation - Pageant Scoring Dashboard Preview",
+        alt: "LOA Tabulation - Pageant Scoring Dashboard Preview",
       },
     ],
     locale: "en_US",
