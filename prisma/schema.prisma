@@ -1,15 +1,93 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../app/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int     @id @default(autoincrement())
+  username String  @unique
+  password String
+  role     Role
+  deleted  Boolean @default(false)
+
+  scores   Score[]
+}
+
+enum Role {
+  ADMIN
+  JUDGE
+}
+
+model Competition {
+  id       Int       @id @default(autoincrement())
+  name     String
+  level    Level
+  deleted  Boolean   @default(false)
+
+  categories Category[]
+  candidates Candidate[]
+}
+
+enum Level {
+  COLLEGE
+  SENIOR_HIGH
+}
+
+model Category {
+  id             Int       @id @default(autoincrement())
+  name           String
+  competitionId  Int
+  deleted        Boolean   @default(false)
+
+  competition Competition @relation(fields: [competitionId], references: [id])
+  criteria     Criteria[]
+}
+
+model Criteria {
+  id         Int      @id @default(autoincrement())
+  name       String
+  percentage Int
+  categoryId Int
+  deleted    Boolean  @default(false)
+
+  category Category @relation(fields: [categoryId], references: [id])
+  scores   Score[]
+}
+
+model Candidate {
+  id              Int       @id @default(autoincrement())
+  name            String
+  course          String
+  candidateNumber Int
+  gender          Gender
+  imageUrl        String?
+  competitionId   Int
+  deleted         Boolean   @default(false)
+
+  competition Competition @relation(fields: [competitionId], references: [id])
+  scores      Score[]
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+model Score {
+  id          Int      @id @default(autoincrement())
+  score       Decimal  @db.Decimal(5, 2)
+  deleted     Boolean  @default(false)
+
+  judgeId     Int
+  candidateId Int
+  criteriaId  Int
+
+  judge     User      @relation(fields: [judgeId], references: [id])
+  candidate Candidate @relation(fields: [candidateId], references: [id])
+  criteria  Criteria  @relation(fields: [criteriaId], references: [id])
 }
