@@ -12,7 +12,7 @@ export const COMPETITION_DATA = [
   {
     title: 'Singing',
     src: '/main/singing-main.png',
-    link: '/competition/sala-behta-hi-jayega'
+    link: '/pageant-shs'
   },
   {
     title: 'Dance Sport',
