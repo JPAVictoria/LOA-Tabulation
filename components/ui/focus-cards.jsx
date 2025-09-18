@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useCallback } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowUpRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -18,7 +19,12 @@ export const Card = React.memo(({ card, index, hovered, setHovered }) => {
           hovered !== null && hovered !== index && 'blur-sm scale-[0.98]'
         )}
       >
-        <img src={card.src} alt={card.title} className='object-cover absolute inset-0 w-full h-full' loading='lazy' />
+        <Image 
+          src={card.src} 
+          alt={card.title} 
+          fill
+          className='object-cover'
+        />
         <div
           className={cn(
             'absolute inset-0 bg-black/50 flex items-end justify-between py-4 px-3 transition-opacity duration-300 will-change-opacity',

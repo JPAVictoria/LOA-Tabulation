@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Crown, Sparkles, Heart } from 'lucide-react'
 import { PAGEANT_COLLEGE_LOGIN_DATA } from '@/app/constants/pageant-college/constants'
@@ -60,16 +61,16 @@ export default function ImageSection() {
 
       <div className='relative h-full'>
         <AnimatePresence mode='wait'>
-          <motion.img
+          <motion.div
             key={currentImage}
-            src={PAGEANT_COLLEGE_LOGIN_DATA[currentImage]}
-            alt='Pageant'
-            className='absolute inset-0 w-full h-full object-cover'
+            className='absolute inset-0'
             initial={{ opacity: 0, scale: 1.1 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 1, ease: 'easeInOut' }}
-          />
+          >
+            <Image src={PAGEANT_COLLEGE_LOGIN_DATA[currentImage]} alt='Pageant' fill className='object-cover' />
+          </motion.div>
         </AnimatePresence>
 
         <div className='absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent z-10' />
