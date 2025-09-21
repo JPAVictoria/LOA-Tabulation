@@ -2,17 +2,17 @@ import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Crown, Sparkles, Heart } from 'lucide-react'
-import { PAGEANT_COLLEGE_LOGIN_DATA } from '@/app/constants/pageant-college/constants'
 
-export default function ImageSection() {
+export default function ImageSection({ data }) {
   const [currentImage, setCurrentImage] = useState(0)
+  const { images, content } = data
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentImage((prev) => (prev + 1) % PAGEANT_COLLEGE_LOGIN_DATA.length)
+      setCurrentImage((prev) => (prev + 1) % images.length)
     }, 4000)
     return () => clearInterval(timer)
-  }, [])
+  }, [images.length])
 
   const floatingElements = [
     { icon: Crown, delay: 0, x: 100, y: 100 },
@@ -69,7 +69,7 @@ export default function ImageSection() {
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ duration: 1, ease: 'easeInOut' }}
           >
-            <Image src={PAGEANT_COLLEGE_LOGIN_DATA[currentImage]} alt='Pageant' fill className='object-cover' />
+            <Image src={images[currentImage]} alt='Pageant' fill className='object-cover' />
           </motion.div>
         </AnimatePresence>
 
@@ -82,9 +82,9 @@ export default function ImageSection() {
             transition={{ delay: 0.5 }}
             className='text-4xl md:text-5xl font-bold mb-4 leading-tight'
           >
-            Lyceum of Alabang
+            {content.mainTitle}
             <span className='bg-clip-text text-transparent bg-gradient-to-r from-red-300 via-pink-300 to-red-200 block'>
-              Pageant College Division
+              {content.subtitle}
             </span>
           </motion.h1>
         </div>

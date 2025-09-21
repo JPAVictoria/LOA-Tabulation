@@ -1,4 +1,4 @@
-export const PAGEANT_COLLEGE_LOGIN_DATA = {
+export const ADMIN_LOGIN_DATA = {
   images: [
     '/pageant-college/pg-1.png',
     '/pageant-college/pg-2.png',
@@ -8,6 +8,6 @@ export const PAGEANT_COLLEGE_LOGIN_DATA = {
 
   content: {
     mainTitle: 'Lyceum of Alabang',
-    subtitle: 'Pageant College Division'
+    subtitle: 'Administrator'
   }
 }

@@ -33,5 +33,10 @@ export const COMPETITION_DATA = [
     title: 'Bench Cheering',
     src: '/main/bench-cheering-main.png',
     link: '/pageant-college'
+  },
+  {
+    title: 'Admin Page',
+    src: '/main/admin.jpg',
+    link: '/admin'
   }
 ]

@@ -2,19 +2,14 @@ import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, User, Lock, Crown } from 'lucide-react'
 
-export default function LoginSection() {
+export default function LoginSection({ onSubmit, isLoading }) {
   const [showPassword, setShowPassword] = useState(false)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    setIsLoading(true)
-    setTimeout(() => {
-      setIsLoading(false)
-      console.log('Login attempted with:', { username, password })
-    }, 1500)
+    onSubmit({ username, password })
   }
 
   return (
