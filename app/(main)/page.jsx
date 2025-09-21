@@ -4,6 +4,7 @@ import { FocusCards } from '@/components/ui/focus-cards'
 import { COMPETITION_DATA } from '../constants/main/constants'
 import { cn } from '@/lib/utils'
 import { AnimatedGridPattern } from '@/components/ui/animated-grid-pattern'
+import Footer from '../modules/common/Footer'
 
 export default function Home() {
   return (
@@ -23,7 +24,7 @@ export default function Home() {
       />
 
       {/* Page Content */}
-      <div className='flex-1 flex flex-col justify-center items-center px-4 space-y-26 relative z-10'>
+      <div className='mt-10 flex-1 flex flex-col justify-start items-center px-4 space-y-20 relative z-10'>
         <div className='text-center'>
           <h2
             className='bg-clip-text text-transparent text-center 
@@ -41,12 +42,7 @@ export default function Home() {
 
         <FocusCards cards={COMPETITION_DATA} />
       </div>
-
-      <footer className='py-6 text-center relative z-10'>
-        <p className='max-w-2xl mx-auto text-base md:text-md text-red-600 dark:text-red-400 text-center leading-relaxed'>
-          © 2025 Junior Programmers Guild. All rights reserved.
-        </p>
-      </footer>
+      <Footer />
     </div>
   )
 }
