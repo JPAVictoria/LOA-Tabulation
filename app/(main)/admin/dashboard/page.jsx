@@ -5,6 +5,7 @@ import Footer from '@/app/modules/common/Footer'
 import CompetitionModal from '@/app/modules/admin/CompetitionModal'
 import CategoryModal from '@/app/modules/admin/CategoryModal'
 import CriteriaModal from '@/app/modules/admin/CriteriaModal'
+import CandidateModal from '@/app/modules/admin/CandidateModal'
 
 export default function AdminDashboard() {
   const [activeModal, setActiveModal] = useState(null)
@@ -97,6 +98,7 @@ export default function AdminDashboard() {
 
       <CategoryModal isOpen={activeModal === 'category'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
       <CriteriaModal isOpen={activeModal === 'criteria'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
+      <CandidateModal isOpen={activeModal === 'candidate'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
     </div>
   )
 }
