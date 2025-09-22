@@ -3,22 +3,21 @@ import React, { useState } from 'react'
 import { ADMIN_DASHBOARD_DATA } from '@/app/constants/admin/constants'
 import Footer from '@/app/modules/common/Footer'
 import CompetitionModal from '@/app/modules/admin/CompetitionModal'
+import CategoryModal from '@/app/modules/admin/CategoryModal'
 
 export default function AdminDashboard() {
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [activeModal, setActiveModal] = useState(null)
 
   const handleButtonClick = (itemId) => {
-    if (itemId === 'competition') {
-      setIsModalOpen(true)
-    }
+    setActiveModal(itemId)
   }
 
   const handleModalClose = () => {
-    setIsModalOpen(false)
+    setActiveModal(null)
   }
 
-  const handleModalSubmit = (formData) => {
-    setIsModalOpen(false)
+  const handleModalSubmit = (data) => {
+    setActiveModal(null)
   }
 
   return (
@@ -39,7 +38,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20'>
-          {ADMIN_DASHBOARD_DATA.map((item, index) => {
+          {ADMIN_DASHBOARD_DATA.map((item) => {
             const Icon = item.icon
             return (
               <button
@@ -89,7 +88,13 @@ export default function AdminDashboard() {
 
       <Footer />
 
-      <CompetitionModal isOpen={isModalOpen} onClose={handleModalClose} onSubmit={handleModalSubmit} />
+      <CompetitionModal
+        isOpen={activeModal === 'competition'}
+        onClose={handleModalClose}
+        onSubmit={handleModalSubmit}
+      />
+
+      <CategoryModal isOpen={activeModal === 'category'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
     </div>
   )
 }
