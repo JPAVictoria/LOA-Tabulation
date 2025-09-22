@@ -1,6 +1,5 @@
 import { Trophy, Tags, Target, Users } from 'lucide-react'
 
-
 export const ADMIN_LOGIN_DATA = {
   images: [
     '/pageant-college/pg-1.png',
@@ -35,13 +34,13 @@ export const ADMIN_DASHBOARD_DATA = [
     title: 'Criteria',
     description: 'Set judging criteria and weights',
     icon: Target,
-    color: 'from-blue-600 via-blue-500 to-cyan-400 dark:from-blue-400 dark:via-blue-300 dark:to-cyan-200'
+    color: 'from-green-600 via-green-500 to-emerald-400 dark:from-green-400 dark:via-green-300 dark:to-emerald-200'
   },
   {
     id: 'candidate',
     title: 'Candidates',
     description: 'Manage competition participants',
     icon: Users,
-    color: 'from-green-600 via-green-500 to-emerald-400 dark:from-green-400 dark:via-green-300 dark:to-emerald-200'
+    color: 'from-blue-600 via-blue-500 to-cyan-400 dark:from-blue-400 dark:via-blue-300 dark:to-cyan-200'
   }
 ]

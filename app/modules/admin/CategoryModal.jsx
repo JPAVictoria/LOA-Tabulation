@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { X, Folder, Loader2 } from 'lucide-react'
+import { X, Tags, Loader2 } from 'lucide-react'
 import { Autocomplete, TextField } from '@mui/material'
 import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
@@ -93,7 +93,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit }) {
 
           <div className='flex items-center gap-3'>
             <div className='p-3 bg-white/20 rounded-xl backdrop-blur-sm'>
-              <Folder className='text-white' size={24} />
+              <Tags className='text-white' size={24} />
             </div>
             <div>
               <h2 className='text-white text-xl font-bold'>Create Category</h2>

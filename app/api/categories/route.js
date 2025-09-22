@@ -33,3 +33,16 @@ export async function POST(request) {
   }
 }
 
+export async function GET() {
+  try {
+    const categories = await prisma.category.findMany({
+      where: { deleted: false },
+      include: { competition: true },
+      orderBy: { id: 'desc' }
+    })
+
+    return NextResponse.json({ success: true, categories })
+  } catch (error) {
+    return NextResponse.json({ success: false, error: 'Failed to fetch categories' }, { status: 500 })
+  }
+}
