@@ -47,7 +47,7 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit }) {
     setIsLoading(true)
 
     try {
-      const { data } = await axios.post('/api/criteria', {
+      const { data } = await axios.post('/api/criterias', {
         name: formData.name.trim(),
         percentage,
         categoryId: parseInt(formData.categoryId)
@@ -71,7 +71,6 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit }) {
   const handleChange = (e) => {
     const { name, value } = e.target
     if (name === 'percentage') {
-      // Only allow numbers and limit to 1-100
       const numValue = value.replace(/[^0-9]/g, '')
       if (numValue === '' || (parseInt(numValue) >= 1 && parseInt(numValue) <= 100)) {
         setFormData((prev) => ({ ...prev, [name]: numValue }))
