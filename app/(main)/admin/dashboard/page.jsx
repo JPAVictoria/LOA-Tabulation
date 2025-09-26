@@ -6,6 +6,8 @@ import CompetitionModal from '@/app/modules/admin/CompetitionModal'
 import CategoryModal from '@/app/modules/admin/CategoryModal'
 import CriteriaModal from '@/app/modules/admin/CriteriaModal'
 import CandidateModal from '@/app/modules/admin/CandidateModal'
+import Link from 'next/link'
+import { ShinyButton } from '@/components/ui/shiny-button'
 
 export default function AdminDashboard() {
   const [activeModal, setActiveModal] = useState(null)
@@ -86,6 +88,12 @@ export default function AdminDashboard() {
             )
           })}
         </div>
+      </div>
+
+      <div className='flex justify-center mt-12 mb-8'>
+        <Link href='/admin/compilation'>
+          <ShinyButton>View data</ShinyButton>
+        </Link>
       </div>
 
       <Footer />

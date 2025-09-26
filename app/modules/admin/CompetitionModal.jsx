@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { X, Trophy, Loader2 } from 'lucide-react'
 import { Autocomplete, TextField } from '@mui/material'
 import axios from 'axios'
@@ -7,10 +7,25 @@ import { useToast } from '@/app/context/ToastContext'
 
 const levelOptions = ['COLLEGE', 'SENIOR_HIGH']
 
-export default function CompetitionModal({ isOpen, onClose, onSubmit }) {
+export default function CompetitionModal({ isOpen, onClose, onSubmit, editData = null }) {
   const [formData, setFormData] = useState({ name: '', level: null })
   const [isLoading, setIsLoading] = useState(false)
   const { showToast } = useToast()
+
+  const isEditMode = Boolean(editData)
+
+  useEffect(() => {
+    if (isOpen) {
+      if (editData) {
+        setFormData({
+          name: editData.name,
+          level: editData.level
+        })
+      } else {
+        setFormData({ name: '', level: null })
+      }
+    }
+  }, [isOpen, editData])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -22,21 +37,25 @@ export default function CompetitionModal({ isOpen, onClose, onSubmit }) {
     setIsLoading(true)
 
     try {
-      const { data } = await axios.post('/api/competitions', {
-        name: formData.name.trim(),
-        level: formData.level
-      })
-
-      if (data.success) {
-        showToast('Competition created successfully!', 'success')
-        onSubmit?.(data.competition)
-        setFormData({ name: '', level: null })
-        onClose?.()
+      if (isEditMode) {
+        onSubmit?.(formData)
       } else {
-        showToast(data.error || 'Failed to create competition', 'error')
+        const { data } = await axios.post('/api/competitions', {
+          name: formData.name.trim(),
+          level: formData.level
+        })
+
+        if (data.success) {
+          showToast('Competition created successfully!', 'success')
+          onSubmit?.(data.competition)
+          setFormData({ name: '', level: null })
+          onClose?.()
+        } else {
+          showToast(data.error || 'Failed to create competition', 'error')
+        }
       }
     } catch (error) {
-      showToast('Failed to create competition', 'error')
+      showToast(`Failed to ${isEditMode ? 'update' : 'create'} competition`, 'error')
     } finally {
       setIsLoading(false)
     }
@@ -76,8 +95,10 @@ export default function CompetitionModal({ isOpen, onClose, onSubmit }) {
               <Trophy className='text-white' size={24} />
             </div>
             <div>
-              <h2 className='text-white text-xl font-bold'>Create Competition</h2>
-              <p className='text-white/80 text-sm'>Add a new competition event</p>
+              <h2 className='text-white text-xl font-bold'>{isEditMode ? 'Edit Competition' : 'Create Competition'}</h2>
+              <p className='text-white/80 text-sm'>
+                {isEditMode ? 'Update competition details' : 'Add a new competition event'}
+              </p>
             </div>
           </div>
         </div>
@@ -149,7 +170,13 @@ export default function CompetitionModal({ isOpen, onClose, onSubmit }) {
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none cursor-pointer'
             >
               {isLoading && <Loader2 size={16} className='animate-spin' />}
-              {isLoading ? 'Creating...' : 'Create Competition'}
+              {isLoading
+                ? isEditMode
+                  ? 'Updating...'
+                  : 'Creating...'
+                : isEditMode
+                ? 'Update Competition'
+                : 'Create Competition'}
             </button>
           </div>
         </form>
