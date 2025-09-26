@@ -5,18 +5,30 @@ import { Autocomplete, TextField } from '@mui/material'
 import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
 
-export default function CriteriaModal({ isOpen, onClose, onSubmit }) {
+export default function CriteriaModal({ isOpen, onClose, onSubmit, editData = null }) {
   const [formData, setFormData] = useState({ name: '', percentage: '', categoryId: null })
   const [categories, setCategories] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingCategories, setIsLoadingCategories] = useState(false)
   const { showToast } = useToast()
 
+  const isEditMode = Boolean(editData)
+
   useEffect(() => {
     if (isOpen) {
       fetchCategories()
+
+      if (editData) {
+        setFormData({
+          name: editData.name,
+          percentage: editData.percentage.toString(),
+          categoryId: editData.category?.id || null
+        })
+      } else {
+        setFormData({ name: '', percentage: '', categoryId: null })
+      }
     }
-  }, [isOpen])
+  }, [isOpen, editData])
 
   const fetchCategories = async () => {
     setIsLoadingCategories(true)
@@ -47,22 +59,44 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit }) {
     setIsLoading(true)
 
     try {
-      const { data } = await axios.post('/api/criterias', {
-        name: formData.name.trim(),
-        percentage,
-        categoryId: parseInt(formData.categoryId)
-      })
+      if (isEditMode) {
+        const { data } = await axios.put(`/api/criterias/${editData.id}`, {
+          name: formData.name.trim(),
+          percentage,
+          categoryId: parseInt(formData.categoryId)
+        })
 
-      if (data.success) {
-        showToast('Criteria created successfully!', 'success')
-        onSubmit?.(data.criteria)
-        setFormData({ name: '', percentage: '', categoryId: null })
-        onClose?.()
+        if (data.success) {
+          showToast('Criteria updated successfully!', 'success')
+          onSubmit?.(data.criteria)
+          setFormData({ name: '', percentage: '', categoryId: null })
+          onClose?.()
+        } else {
+          showToast(data.error || 'Failed to update criteria', 'error')
+        }
       } else {
-        showToast(data.error || 'Failed to create criteria', 'error')
+        const { data } = await axios.post('/api/criterias', {
+          name: formData.name.trim(),
+          percentage,
+          categoryId: parseInt(formData.categoryId)
+        })
+
+        if (data.success) {
+          showToast('Criteria created successfully!', 'success')
+          onSubmit?.(data.criteria)
+          setFormData({ name: '', percentage: '', categoryId: null })
+          onClose?.()
+        } else {
+          showToast(data.error || 'Failed to create criteria', 'error')
+        }
       }
     } catch (error) {
-      showToast('Failed to create criteria', 'error')
+      // Handle the case where PUT route doesn't exist yet
+      if (isEditMode && error.response?.status === 404) {
+        showToast('Edit functionality not yet implemented', 'error')
+      } else {
+        showToast(`Failed to ${isEditMode ? 'update' : 'create'} criteria`, 'error')
+      }
     } finally {
       setIsLoading(false)
     }
@@ -110,8 +144,10 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit }) {
               <Target className='text-white' size={24} />
             </div>
             <div>
-              <h2 className='text-white text-xl font-bold'>Create Criteria</h2>
-              <p className='text-white/80 text-sm'>Add a new criteria to a category</p>
+              <h2 className='text-white text-xl font-bold'>{isEditMode ? 'Edit Criteria' : 'Create Criteria'}</h2>
+              <p className='text-white/80 text-sm'>
+                {isEditMode ? 'Update criteria details' : 'Add a new criteria to a category'}
+              </p>
             </div>
           </div>
         </div>
@@ -211,7 +247,13 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit }) {
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none'
             >
               {isLoading && <Loader2 size={16} className='animate-spin' />}
-              {isLoading ? 'Creating...' : 'Create Criteria'}
+              {isLoading
+                ? isEditMode
+                  ? 'Updating...'
+                  : 'Creating...'
+                : isEditMode
+                ? 'Update Criteria'
+                : 'Create Criteria'}
             </button>
           </div>
         </form>

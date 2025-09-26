@@ -42,13 +42,21 @@ export async function POST(request) {
 
 export async function GET() {
   try {
-    const criteria = await prisma.criteria.findMany({
-      where: { deleted: false },
+    const criterias = await prisma.criteria.findMany({
+      where: {
+        deleted: false,
+        category: {
+          deleted: false, 
+          competition: {
+            deleted: false 
+          }
+        }
+      },
       include: { category: { include: { competition: true } } },
       orderBy: { id: 'desc' }
     })
 
-    return NextResponse.json({ success: true, criteria })
+    return NextResponse.json({ success: true, criterias })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch criteria' }, { status: 500 })
   }

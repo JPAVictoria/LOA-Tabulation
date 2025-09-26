@@ -5,6 +5,7 @@ import { Chip } from '@mui/material'
 import { ADMIN_DASHBOARD_DATA } from '@/app/constants/admin/constants'
 import CompetitionTable from '@/app/modules/admin/CompetitionTable'
 import CategoryTable from '@/app/modules/admin/CategoryTable'
+import CriteriaTable from '@/app/modules/admin/CriteriaTable'
 import Footer from '@/app/modules/common/Footer'
 import { ShinyButton } from '@/components/ui/shiny-button'
 
@@ -22,7 +23,7 @@ export default function AdminCompilation() {
       case 'category':
         return <CategoryTable/>
       case 'criteria':
-        return <div>Criteria Table Component (To be implemented)</div>
+        return <CriteriaTable/>
       case 'candidate':
         return <div>Candidate Table Component (To be implemented)</div>
       default:
