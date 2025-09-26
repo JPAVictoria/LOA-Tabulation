@@ -5,18 +5,29 @@ import { Autocomplete, TextField } from '@mui/material'
 import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
 
-export default function CategoryModal({ isOpen, onClose, onSubmit }) {
+export default function CategoryModal({ isOpen, onClose, onSubmit, editData = null }) {
   const [formData, setFormData] = useState({ name: '', competitionId: null })
   const [competitions, setCompetitions] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(false)
   const { showToast } = useToast()
 
+  const isEditMode = Boolean(editData)
+
   useEffect(() => {
     if (isOpen) {
       fetchCompetitions()
+
+      if (editData) {
+        setFormData({
+          name: editData.name,
+          competitionId: editData.competitionId
+        })
+      } else {
+        setFormData({ name: '', competitionId: null })
+      }
     }
-  }, [isOpen])
+  }, [isOpen, editData])
 
   const fetchCompetitions = async () => {
     setIsLoadingCompetitions(true)
@@ -42,21 +53,37 @@ export default function CategoryModal({ isOpen, onClose, onSubmit }) {
     setIsLoading(true)
 
     try {
-      const { data } = await axios.post('/api/categories', {
-        name: formData.name.trim(),
-        competitionId: parseInt(formData.competitionId)
-      })
+      if (isEditMode) {
+        const { data } = await axios.put(`/api/categories/${editData.id}`, {
+          name: formData.name.trim(),
+          competitionId: parseInt(formData.competitionId)
+        })
 
-      if (data.success) {
-        showToast('Category created successfully!', 'success')
-        onSubmit?.(data.category)
-        setFormData({ name: '', competitionId: null })
-        onClose?.()
+        if (data.success) {
+          showToast('Category updated successfully!', 'success')
+          onSubmit?.(data.category)
+          setFormData({ name: '', competitionId: null })
+          onClose?.()
+        } else {
+          showToast(data.error || 'Failed to update category', 'error')
+        }
       } else {
-        showToast(data.error || 'Failed to create category', 'error')
+        const { data } = await axios.post('/api/categories', {
+          name: formData.name.trim(),
+          competitionId: parseInt(formData.competitionId)
+        })
+
+        if (data.success) {
+          showToast('Category created successfully!', 'success')
+          onSubmit?.(data.category)
+          setFormData({ name: '', competitionId: null })
+          onClose?.()
+        } else {
+          showToast(data.error || 'Failed to create category', 'error')
+        }
       }
     } catch (error) {
-      showToast('Failed to create category', 'error')
+      showToast(`Failed to ${isEditMode ? 'update' : 'create'} category`, 'error')
     } finally {
       setIsLoading(false)
     }
@@ -96,8 +123,10 @@ export default function CategoryModal({ isOpen, onClose, onSubmit }) {
               <Tags className='text-white' size={24} />
             </div>
             <div>
-              <h2 className='text-white text-xl font-bold'>Create Category</h2>
-              <p className='text-white/80 text-sm'>Add a new category to a competition</p>
+              <h2 className='text-white text-xl font-bold'>{isEditMode ? 'Edit Category' : 'Create Category'}</h2>
+              <p className='text-white/80 text-sm'>
+                {isEditMode ? 'Update category details' : 'Add a new category to a competition'}
+              </p>
             </div>
           </div>
         </div>
@@ -178,7 +207,13 @@ export default function CategoryModal({ isOpen, onClose, onSubmit }) {
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none'
             >
               {isLoading && <Loader2 size={16} className='animate-spin' />}
-              {isLoading ? 'Creating...' : 'Create Category'}
+              {isLoading
+                ? isEditMode
+                  ? 'Updating...'
+                  : 'Creating...'
+                : isEditMode
+                ? 'Update Category'
+                : 'Create Category'}
             </button>
           </div>
         </form>

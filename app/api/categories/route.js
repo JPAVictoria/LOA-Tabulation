@@ -36,7 +36,12 @@ export async function POST(request) {
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
-      where: { deleted: false },
+      where: {
+        deleted: false,
+        competition: {
+          deleted: false // Only include categories where competition is not deleted
+        }
+      },
       include: { competition: true },
       orderBy: { id: 'desc' }
     })

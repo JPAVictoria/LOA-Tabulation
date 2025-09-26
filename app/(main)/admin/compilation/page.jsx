@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { Chip } from '@mui/material'
 import { ADMIN_DASHBOARD_DATA } from '@/app/constants/admin/constants'
 import CompetitionTable from '@/app/modules/admin/CompetitionTable'
+import CategoryTable from '@/app/modules/admin/CategoryTable'
 import Footer from '@/app/modules/common/Footer'
 import { ShinyButton } from '@/components/ui/shiny-button'
 
@@ -19,7 +20,7 @@ export default function AdminCompilation() {
       case 'competition':
         return <CompetitionTable />
       case 'category':
-        return <div>Category Table Component (To be implemented)</div>
+        return <CategoryTable/>
       case 'criteria':
         return <div>Criteria Table Component (To be implemented)</div>
       case 'candidate':

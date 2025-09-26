@@ -18,7 +18,7 @@ export const ADMIN_DASHBOARD_DATA = [
   {
     id: 'competition',
     title: 'Competitions',
-    description: 'Manage competition events and levels',
+    description: 'Manage competition events',
     icon: Trophy,
     color: 'from-red-600 via-red-500 to-pink-400 dark:from-red-400 dark:via-red-300 dark:to-pink-200'
   },
