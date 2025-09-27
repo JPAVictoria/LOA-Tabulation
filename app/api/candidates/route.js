@@ -18,8 +18,21 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'All fields except image are required' }, { status: 400 })
     }
 
+    // Check if competition exists and is not deleted
+    const competition = await prisma.competition.findFirst({
+      where: { id: parseInt(competitionId), deleted: false }
+    })
+
+    if (!competition) {
+      return NextResponse.json({ success: false, error: 'Competition not found or has been deleted' }, { status: 400 })
+    }
+
     const existing = await prisma.candidate.findFirst({
-      where: { candidateNumber: parseInt(candidateNumber), competitionId: parseInt(competitionId), deleted: false }
+      where: {
+        candidateNumber: parseInt(candidateNumber),
+        competitionId: parseInt(competitionId),
+        deleted: false
+      }
     })
 
     if (existing) {
@@ -65,6 +78,7 @@ export async function POST(request) {
 
     return NextResponse.json({ success: true, candidate }, { status: 201 })
   } catch (error) {
+    console.error('Error creating candidate:', error)
     return NextResponse.json({ success: false, error: 'Failed to create candidate' }, { status: 500 })
   }
 }
@@ -72,13 +86,19 @@ export async function POST(request) {
 export async function GET() {
   try {
     const candidates = await prisma.candidate.findMany({
-      where: { deleted: false },
+      where: {
+        deleted: false,
+        competition: {
+          deleted: false
+        }
+      },
       include: { competition: true },
       orderBy: { id: 'desc' }
     })
 
     return NextResponse.json({ success: true, candidates })
   } catch (error) {
+    console.error('Error fetching candidates:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch candidates' }, { status: 500 })
   }
 }

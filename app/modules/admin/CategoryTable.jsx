@@ -121,14 +121,14 @@ export default function CategoryTable() {
         <div className='flex gap-1 items-center justify-center h-full'>
           <button
             onClick={() => openModal(row, true)}
-            className='p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors'
+            className='p-2 text-blue-600 cursor-pointer hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors'
             title='Edit Category'
           >
             <Edit size={16} />
           </button>
           <button
             onClick={() => openModal(row, false)}
-            className='p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors'
+            className='p-2 text-red-600 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors'
             title='Delete Category'
           >
             <Trash2 size={16} />
@@ -159,8 +159,9 @@ export default function CategoryTable() {
         isOpen={deleteModalOpen}
         onClose={closeModals}
         onConfirm={handleDelete}
-        competitionName={selectedCategory?.name || ''}
+        itemName={selectedCategory?.name || ''}
         isLoading={deleteLoading}
+        itemType='category'
       />
     </div>
   )

@@ -1,8 +1,23 @@
 import React from 'react'
 import { Trash2, X } from 'lucide-react'
 
-const DeleteModal = ({ isOpen, onClose, onConfirm, competitionName, isLoading }) => {
+const DeleteModal = ({ isOpen, onClose, onConfirm, itemName, isLoading, itemType = 'item' }) => {
   if (!isOpen) return null
+
+  const getItemTypeText = () => {
+    switch (itemType) {
+      case 'competition':
+        return 'Competition'
+      case 'candidate':
+        return 'Candidate'
+      case 'category':
+        return 'Category'
+      case 'criteria':
+        return 'Criteria'
+      default:
+        return 'Item'
+    }
+  }
 
   return (
     <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4'>
@@ -10,7 +25,7 @@ const DeleteModal = ({ isOpen, onClose, onConfirm, competitionName, isLoading })
         <div className='flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700'>
           <div className='flex items-center gap-2'>
             <Trash2 className='text-red-500' size={20} />
-            <h2 className='text-lg font-semibold text-gray-900 dark:text-white'>Delete Competition</h2>
+            <h2 className='text-lg font-semibold text-gray-900 dark:text-white'>Delete {getItemTypeText()}</h2>
           </div>
           <button
             onClick={onClose}
@@ -22,8 +37,10 @@ const DeleteModal = ({ isOpen, onClose, onConfirm, competitionName, isLoading })
         </div>
 
         <div className='p-4'>
-          <p className='text-gray-700 dark:text-gray-300 mb-2'>Are you sure you want to delete the competition:</p>
-          <p className='font-semibold text-gray-900 dark:text-white mb-4'>"{competitionName}"</p>
+          <p className='text-gray-700 dark:text-gray-300 mb-2'>
+            Are you sure you want to delete this {getItemTypeText().toLowerCase()}:
+          </p>
+          <p className='font-semibold text-gray-900 dark:text-white mb-4'>"{itemName}"</p>
           <p className='text-sm text-red-600 dark:text-red-400'>This action cannot be undone.</p>
         </div>
 

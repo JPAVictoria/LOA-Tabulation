@@ -144,14 +144,14 @@ export default function CriteriaTable() {
         <div className='flex gap-1 items-center justify-center h-full'>
           <button
             onClick={() => openModal(row, true)}
-            className='p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 rounded transition-colors'
+            className='p-2 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900 cursor-pointer rounded transition-colors'
             title='Edit Criteria'
           >
             <Edit size={16} />
           </button>
           <button
             onClick={() => openModal(row, false)}
-            className='p-2 text-red-600 hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors'
+            className='p-2 text-red-600 cursor-pointer hover:bg-red-100 dark:hover:bg-red-900 rounded transition-colors'
             title='Delete Criteria'
           >
             <Trash2 size={16} />
@@ -182,8 +182,9 @@ export default function CriteriaTable() {
         isOpen={deleteModalOpen}
         onClose={closeModals}
         onConfirm={handleDelete}
-        competitionName={selectedCriteria?.name || ''}
+        itemName={selectedCriteria?.name || ''}
         isLoading={deleteLoading}
+        itemType='criteria'
       />
     </div>
   )
