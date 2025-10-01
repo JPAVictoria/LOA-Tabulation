@@ -6,6 +6,7 @@ import CompetitionModal from '@/app/modules/admin/CompetitionModal'
 import CategoryModal from '@/app/modules/admin/CategoryModal'
 import CriteriaModal from '@/app/modules/admin/CriteriaModal'
 import CandidateModal from '@/app/modules/admin/CandidateModal'
+import JudgeModal from '@/app/modules/admin/JudgeModal'
 import Link from 'next/link'
 import { ShinyButton } from '@/components/ui/shiny-button'
 
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
           </p>
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mt-20'>
           {ADMIN_DASHBOARD_DATA.map((item) => {
             const Icon = item.icon
             return (
@@ -107,6 +108,7 @@ export default function AdminDashboard() {
       <CategoryModal isOpen={activeModal === 'category'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
       <CriteriaModal isOpen={activeModal === 'criteria'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
       <CandidateModal isOpen={activeModal === 'candidate'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
+      <JudgeModal isOpen={activeModal === 'judges'} onClose={handleModalClose} onSubmit={handleModalSubmit} />
     </div>
   )
 }

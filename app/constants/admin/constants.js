@@ -1,4 +1,4 @@
-import { Trophy, Tags, Target, Users } from 'lucide-react'
+import { Trophy, Tags, Target, Users, UserRoundCheck } from 'lucide-react'
 
 export const ADMIN_LOGIN_DATA = {
   images: [
@@ -42,5 +42,12 @@ export const ADMIN_DASHBOARD_DATA = [
     description: 'Manage competition participants',
     icon: Users,
     color: 'from-blue-600 via-blue-500 to-cyan-400 dark:from-blue-400 dark:via-blue-300 dark:to-cyan-200'
+  },
+  {
+    id: 'judges',
+    title: 'Judges',
+    description: 'Manage competition judges',
+    icon: UserRoundCheck,
+    color: 'from-yellow-500 via-yellow-400 to-amber-300 dark:from-yellow-400 dark:via-yellow-300 dark:to-amber-200'
   }
 ]

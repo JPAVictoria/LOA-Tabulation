@@ -1,16 +1,21 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import { X, Tags, Loader2 } from 'lucide-react'
+import { X, Gavel, Loader2, Eye, EyeOff } from 'lucide-react'
 import { Autocomplete, TextField } from '@mui/material'
 import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
 
-export default function CategoryModal({ isOpen, onClose, onSubmit, editData = null }) {
-  const [formData, setFormData] = useState({ name: '', competitionId: null })
+export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null }) {
+  const [formData, setFormData] = useState({
+    username: '',
+    password: '',
+    competitionId: null
+  })
   const [competitions, setCompetitions] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(false)
   const { showToast } = useToast()
+  const [showPassword, setShowPassword] = useState(false)
 
   const isEditMode = Boolean(editData)
 
@@ -20,11 +25,12 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
 
       if (editData) {
         setFormData({
-          name: editData.name,
+          username: editData.username,
+          password: '',
           competitionId: editData.competitionId
         })
       } else {
-        setFormData({ name: '', competitionId: null })
+        setFormData({ username: '', password: '', competitionId: null })
       }
     }
   }, [isOpen, editData])
@@ -46,7 +52,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.name.trim() || !formData.competitionId) {
+    if (!formData.username.trim() || !formData.password.trim() || !formData.competitionId) {
       return showToast('All fields are required', 'error')
     }
 
@@ -54,36 +60,25 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
 
     try {
       if (isEditMode) {
-        const { data } = await axios.put(`/api/categories/${editData.id}`, {
-          name: formData.name.trim(),
-          competitionId: parseInt(formData.competitionId)
-        })
-
-        if (data.success) {
-          showToast('Category updated successfully!', 'success')
-          onSubmit?.(data.category)
-          setFormData({ name: '', competitionId: null })
-          onClose?.()
-        } else {
-          showToast(data.error || 'Failed to update category', 'error')
-        }
+        onSubmit?.(formData)
       } else {
-        const { data } = await axios.post('/api/categories', {
-          name: formData.name.trim(),
+        const { data } = await axios.post('/api/judges', {
+          username: formData.username.trim(),
+          password: formData.password.trim(),
           competitionId: parseInt(formData.competitionId)
         })
 
         if (data.success) {
-          showToast('Category created successfully!', 'success')
-          onSubmit?.(data.category)
-          setFormData({ name: '', competitionId: null })
+          showToast('Judge created successfully!', 'success')
+          onSubmit?.(data.judge)
+          setFormData({ username: '', password: '', competitionId: null })
           onClose?.()
         } else {
-          showToast(data.error || 'Failed to create category', 'error')
+          showToast(data.error || 'Failed to create judge', 'error')
         }
       }
     } catch (error) {
-      showToast(`Failed to ${isEditMode ? 'update' : 'create'} category`, 'error')
+      showToast(`Failed to ${isEditMode ? 'update' : 'create'} judge`, 'error')
     } finally {
       setIsLoading(false)
     }
@@ -99,7 +94,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
 
   const handleClose = () => {
     if (!isLoading) {
-      setFormData({ name: '', competitionId: null })
+      setFormData({ username: '', password: '', competitionId: null })
       onClose?.()
     }
   }
@@ -109,7 +104,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
   return (
     <div className='fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4'>
       <div className='bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md relative overflow-hidden'>
-        <div className='relative px-6 py-6 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-400 dark:from-blue-400 dark:via-blue-300 dark:to-purple-200'>
+        <div className='relative px-6 py-6 bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-300 dark:from-yellow-400 dark:via-yellow-300 dark:to-amber-200'>
           <button
             onClick={handleClose}
             disabled={isLoading}
@@ -120,33 +115,58 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
 
           <div className='flex items-center gap-3'>
             <div className='p-3 bg-white/20 rounded-xl backdrop-blur-sm'>
-              <Tags className='text-white' size={24} />
+              <Gavel className='text-white' size={24} />
             </div>
             <div>
-              <h2 className='text-white text-xl font-bold'>{isEditMode ? 'Edit Category' : 'Create Category'}</h2>
-              <p className='text-white/80 text-sm'>
-                {isEditMode ? 'Update category details' : 'Add a new category to a competition'}
-              </p>
+              <h2 className='text-white text-xl font-bold'>{isEditMode ? 'Edit Judge' : 'Create Judge'}</h2>
+              <p className='text-white/80 text-sm'>{isEditMode ? 'Update judge details' : 'Add a new judge account'}</p>
             </div>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className='p-6 space-y-6'>
           <div>
-            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Category Name *</label>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Username *</label>
             <input
               type='text'
-              name='name'
-              value={formData.name}
+              name='username'
+              value={formData.username}
               onChange={handleChange}
               disabled={isLoading}
-              placeholder='Enter category name'
+              placeholder='Enter username'
               className='w-full px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl 
-                       focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                       focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent
                        bg-white dark:bg-gray-800 text-gray-900 dark:text-white
                        placeholder-gray-500 dark:placeholder-gray-400 transition-all
                        disabled:opacity-50 disabled:cursor-not-allowed'
             />
+          </div>
+
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Password *</label>
+            <div className='relative'>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name='password'
+                value={formData.password}
+                onChange={handleChange}
+                disabled={isLoading}
+                placeholder='Enter password'
+                className='w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl 
+       focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent
+       bg-white dark:bg-gray-800 text-gray-900 dark:text-white
+       placeholder-gray-500 dark:placeholder-gray-400 transition-all
+       disabled:opacity-50 disabled:cursor-not-allowed'
+              />
+              <button
+                type='button'
+                onClick={() => setShowPassword(!showPassword)}
+                className='cursor-pointer absolute inset-y-0 right-0 flex items-center text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
+                tabIndex={-1}
+              >
+                <span className='px-3'>{showPassword ? <EyeOff size={20} /> : <Eye size={20} />}</span>
+              </button>
+            </div>
           </div>
 
           <div>
@@ -177,8 +197,8 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
                     '& .MuiOutlinedInput-root': {
                       borderRadius: '12px',
                       '& fieldset': { borderColor: '#d1d5db' },
-                      '&:hover fieldset': { borderColor: '#3b82f6' },
-                      '&.Mui-focused fieldset': { borderColor: '#3b82f6', borderWidth: '2px' },
+                      '&:hover fieldset': { borderColor: '#eab308' },
+                      '&.Mui-focused fieldset': { borderColor: '#eab308', borderWidth: '2px' },
                       '&.Mui-disabled fieldset': { borderColor: '#d1d5db', opacity: 0.5 }
                     }
                   }}
@@ -200,20 +220,14 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
             </button>
             <button
               type='submit'
-              disabled={isLoading || !formData.name.trim() || !formData.competitionId}
-              className='cursor-pointer flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-400 
-                       dark:from-blue-400 dark:via-blue-300 dark:to-purple-200 text-white rounded-xl 
+              disabled={isLoading || !formData.username.trim() || !formData.password.trim() || !formData.competitionId}
+              className='cursor-pointer flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-300 
+                       dark:from-yellow-400 dark:via-yellow-300 dark:to-amber-200 text-white rounded-xl 
                        hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none'
             >
               {isLoading && <Loader2 size={16} className='animate-spin' />}
-              {isLoading
-                ? isEditMode
-                  ? 'Updating...'
-                  : 'Creating...'
-                : isEditMode
-                ? 'Update Category'
-                : 'Create Category'}
+              {isLoading ? (isEditMode ? 'Updating...' : 'Creating...') : isEditMode ? 'Update Judge' : 'Create Judge'}
             </button>
           </div>
         </form>
