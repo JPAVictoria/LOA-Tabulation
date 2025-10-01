@@ -26,7 +26,7 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
       if (editData) {
         setFormData({
           username: editData.username,
-          password: '',
+          password: '', // Leave blank in edit mode - user can optionally update it
           competitionId: editData.competitionId
         })
       } else {
@@ -52,8 +52,13 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.username.trim() || !formData.password.trim() || !formData.competitionId) {
-      return showToast('All fields are required', 'error')
+    // Validation: password required only for create mode
+    if (!formData.username.trim() || !formData.competitionId) {
+      return showToast('Username and competition are required', 'error')
+    }
+
+    if (!isEditMode && !formData.password.trim()) {
+      return showToast('Password is required', 'error')
     }
 
     setIsLoading(true)
@@ -143,7 +148,9 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
           </div>
 
           <div>
-            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Password *</label>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>
+              Password {isEditMode ? '(optional - leave blank to keep current)' : '*'}
+            </label>
             <div className='relative'>
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -151,7 +158,7 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
                 value={formData.password}
                 onChange={handleChange}
                 disabled={isLoading}
-                placeholder='Enter password'
+                placeholder={isEditMode ? 'Enter new password or leave blank' : 'Enter password'}
                 className='w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-xl 
        focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent
        bg-white dark:bg-gray-800 text-gray-900 dark:text-white
@@ -220,7 +227,12 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
             </button>
             <button
               type='submit'
-              disabled={isLoading || !formData.username.trim() || !formData.password.trim() || !formData.competitionId}
+              disabled={
+                isLoading ||
+                !formData.username.trim() ||
+                !formData.competitionId ||
+                (!isEditMode && !formData.password.trim())
+              }
               className='cursor-pointer flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-300 
                        dark:from-yellow-400 dark:via-yellow-300 dark:to-amber-200 text-white rounded-xl 
                        hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2

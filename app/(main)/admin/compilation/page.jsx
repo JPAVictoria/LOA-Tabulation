@@ -7,6 +7,7 @@ import CompetitionTable from '@/app/modules/admin/CompetitionTable'
 import CategoryTable from '@/app/modules/admin/CategoryTable'
 import CriteriaTable from '@/app/modules/admin/CriteriaTable'
 import CandidateTable from '@/app/modules/admin/CandidateTable'
+import JudgeTable from '@/app/modules/admin/JudgeTable'
 import Footer from '@/app/modules/common/Footer'
 import { ShinyButton } from '@/components/ui/shiny-button'
 
@@ -22,11 +23,13 @@ export default function AdminCompilation() {
       case 'competition':
         return <CompetitionTable />
       case 'category':
-        return <CategoryTable/>
+        return <CategoryTable />
       case 'criteria':
-        return <CriteriaTable/>
+        return <CriteriaTable />
       case 'candidate':
-        return <CandidateTable/>
+        return <CandidateTable />
+      case 'judges':
+        return <JudgeTable />
       default:
         return <CompetitionTable />
     }
