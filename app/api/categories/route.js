@@ -39,14 +39,25 @@ export async function GET() {
       where: {
         deleted: false,
         competition: {
-          deleted: false // Only include categories where competition is not deleted
+          deleted: false
         }
       },
-      include: { competition: true },
+      include: {
+        competition: true,
+        criteria: {
+          where: { deleted: false }
+        }
+      },
       orderBy: { id: 'desc' }
     })
 
-    return NextResponse.json({ success: true, categories })
+    const categoriesWithCount = categories.map((cat) => ({
+      ...cat,
+      criteriaCount: cat.criteria.length,
+      criteria: undefined 
+    }))
+
+    return NextResponse.json({ success: true, categories: categoriesWithCount })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch categories' }, { status: 500 })
   }

@@ -193,7 +193,9 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit, editData = nu
             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Category *</label>
             <Autocomplete
               options={categories}
-              getOptionLabel={(option) => `${option.name} (${option.competition.name})`}
+              getOptionLabel={(option) =>
+                `${option.name} (${option.competition.name}) - ${option.criteriaCount || 0} criterias assigned`
+              }
               value={categories.find((cat) => cat.id === formData.categoryId) || null}
               onChange={handleCategoryChange}
               disabled={isLoading || isLoadingCategories}
