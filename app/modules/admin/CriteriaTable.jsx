@@ -88,7 +88,6 @@ export default function CriteriaTable() {
   }
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 80, headerAlign: 'center', align: 'center' },
     { field: 'name', headerName: 'Criteria Name', flex: 1, minWidth: 200 },
     {
       field: 'percentage',

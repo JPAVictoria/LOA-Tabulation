@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react'
 import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
 import ScoringTable from '@/app/modules/common/ScoringTable'
+import ScoringModal from '@/app/modules/common/ScoringModal'
 import Footer from '@/app/modules/common/Footer'
 
 export default function PageantScoringPage() {
@@ -10,7 +11,17 @@ export default function PageantScoringPage() {
   const [assignedJudges, setAssignedJudges] = useState([])
   const [totalJudges, setTotalJudges] = useState(0)
   const [loading, setLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedCandidateId, setSelectedCandidateId] = useState(null)
+  const [judgeId, setJudgeId] = useState(null) // Get this from your login state/context
   const { showToast } = useToast()
+
+  useEffect(() => {
+    const storedJudgeId = localStorage.getItem('judgeId')
+    if (storedJudgeId) {
+      setJudgeId(parseInt(storedJudgeId))
+    }
+  }, [])
 
   const fetchCandidates = async () => {
     try {
@@ -36,9 +47,17 @@ export default function PageantScoringPage() {
   }, [])
 
   const handleGrade = (candidateId) => {
-    // TODO: Implement grading modal/navigation
-    console.log('Grade candidate:', candidateId)
-    showToast('Grading feature coming soon!', 'info')
+    setSelectedCandidateId(candidateId)
+    setModalOpen(true)
+  }
+
+  const handleModalClose = () => {
+    setModalOpen(false)
+    setSelectedCandidateId(null)
+  }
+
+  const handleModalSuccess = () => {
+    fetchCandidates()
   }
 
   return (
@@ -50,7 +69,19 @@ export default function PageantScoringPage() {
         loading={loading}
         onGrade={handleGrade}
       />
-      <Footer/>
+
+      <ScoringModal
+        open={modalOpen}
+        candidateId={selectedCandidateId}
+        judgeId={judgeId}
+        competition='PAGEANTRY'
+        apiEndpoint='/api/scoring/pageant'
+        onClose={handleModalClose}
+        onSuccess={handleModalSuccess}
+        showToast={showToast}
+      />
+
+      <Footer />
     </>
   )
 }

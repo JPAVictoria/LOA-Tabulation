@@ -36,23 +36,17 @@ export default function ScoringTable({ candidates, assignedJudges, totalJudges, 
   const columns = [
     {
       field: 'candidateNumber',
-      headerName: 'No.',
-      width: 80,
-      headerAlign: 'center',
-      align: 'center'
-    },
-    {
-      field: 'id',
-      headerName: 'Candidate ID',
+      headerName: 'Candidate Number',
       width: 120,
       headerAlign: 'center',
       align: 'center'
     },
+
     {
       field: 'name',
       headerName: 'Candidate Name',
       flex: 1,
-      minWidth: 200
+      minWidth: 150
     },
     {
       field: 'judgesScored',

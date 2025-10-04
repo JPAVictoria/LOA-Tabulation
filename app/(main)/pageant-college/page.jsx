@@ -23,6 +23,10 @@ export default function PageantCollegePage() {
       })
 
       if (response.data.success) {
+        // Store judge info in localStorage
+        localStorage.setItem('judgeId', response.data.user.id)
+        localStorage.setItem('judgeName', response.data.user.username)
+
         showToast('Login successful!', 'success')
         setTimeout(() => router.push('/pageant-college/dashboard'), 1000)
       }
