@@ -2,7 +2,7 @@ export const COMPETITION_DATA = [
   {
     title: 'Pageant College',
     src: '/main/pageant-college.png',
-    link: '/pageant-college'
+    link: '/pageant'
   },
   {
     title: 'Pageant SHS',

@@ -1,19 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
-import Image from 'next/image'
 import { X, Save, User } from 'lucide-react'
 import { Dialog, DialogContent, TextField, CircularProgress } from '@mui/material'
 import axios from 'axios'
 
-export default function ScoringModal({
-  open,
-  candidateId,
-  competition = 'PAGEANTRY',
-  apiEndpoint = '/api/scoring/pageant',
-  onClose,
-  onSuccess,
-  showToast
-}) {
+export default function ScoringModal({ open, candidateId, onClose, onSuccess, showToast }) {
   const [candidate, setCandidate] = useState(null)
   const [categories, setCategories] = useState([])
   const [scores, setScores] = useState({})
@@ -27,28 +18,37 @@ export default function ScoringModal({
   useEffect(() => {
     if (open && candidateId && judgeId) {
       fetchCandidateAndCategories()
+    } else if (!open) {
+      // Reset state when modal closes
+      setScores({})
+      setIsEditing(false)
+      setCandidate(null)
+      setCategories([])
     }
   }, [open, candidateId, judgeId])
 
   const fetchCandidateAndCategories = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get(`${apiEndpoint}/${candidateId}?judgeId=${judgeId}`)
+      const { data } = await axios.get(`/api/scoring/pageant/${candidateId}?judgeId=${judgeId}`)
 
       if (data.success) {
         setCandidate(data.candidate)
         setCategories(data.categories)
 
-        const existingScoresMap = {}
-        let hasExistingScores = false
-
-        data.existingScores?.forEach((score) => {
-          existingScoresMap[score.criteriaId] = score.score
-          hasExistingScores = true
-        })
-
-        setScores(existingScoresMap)
-        setIsEditing(hasExistingScores)
+        // Only populate scores if there are existing scores
+        if (data.existingScores && data.existingScores.length > 0) {
+          const existingScoresMap = {}
+          data.existingScores.forEach((score) => {
+            existingScoresMap[score.criteriaId] = score.score
+          })
+          setScores(existingScoresMap)
+          setIsEditing(true)
+        } else {
+          // Reset to empty scores if no existing scores
+          setScores({})
+          setIsEditing(false)
+        }
       }
     } catch (error) {
       showToast?.('Failed to fetch candidate data', 'error')
@@ -67,20 +67,26 @@ export default function ScoringModal({
   }
 
   const validateScores = () => {
-    const allCriteria = categories.flatMap((cat) => cat.criteria)
-
-    for (const criteria of allCriteria) {
-      const score = scores[criteria.id]
-
+    // Only validate scores that have been entered
+    for (const [criteriaId, score] of Object.entries(scores)) {
+      // Skip empty scores
       if (score === '' || score === undefined || score === null) {
-        showToast?.(`Please enter a score for "${criteria.name}"`, 'error')
-        return false
+        continue
       }
 
       if (score < 0 || score > 100) {
-        showToast?.(`Score for "${criteria.name}" must be between 0 and 100`, 'error')
+        const criteria = categories.flatMap((cat) => cat.criteria).find((c) => c.id === parseInt(criteriaId))
+        showToast?.(`Score for "${criteria?.name}" must be between 0 and 100`, 'error')
         return false
       }
+    }
+
+    // Check if at least one score is entered
+    const hasAnyScore = Object.values(scores).some((score) => score !== '' && score !== undefined && score !== null)
+
+    if (!hasAnyScore) {
+      showToast?.('Please enter at least one score', 'error')
+      return false
     }
 
     return true
@@ -92,20 +98,25 @@ export default function ScoringModal({
     try {
       setSubmitting(true)
 
-      const payload = {
-        judgeId: parseInt(judgeId),
-        candidateId: candidate.id,
-        scores: Object.entries(scores).map(([criteriaId, score]) => ({
+      // Only include scores that have been entered
+      const validScores = Object.entries(scores)
+        .filter(([_, score]) => score !== '' && score !== undefined && score !== null)
+        .map(([criteriaId, score]) => ({
           criteriaId: parseInt(criteriaId),
           score: parseFloat(score)
         }))
+
+      const payload = {
+        judgeId: parseInt(judgeId),
+        candidateId: candidate.id,
+        scores: validScores
       }
 
       if (isEditing) {
-        await axios.put(`${apiEndpoint}/${candidateId}`, payload)
+        await axios.put(`/api/scoring/pageant/${candidateId}`, payload)
         showToast?.('Scores updated successfully!', 'success')
       } else {
-        await axios.post(apiEndpoint, payload)
+        await axios.post('/api/scoring/pageant', payload)
         showToast?.('Scores submitted successfully!', 'success')
       }
 
@@ -160,13 +171,7 @@ export default function ScoringModal({
                 {/* Candidate Image */}
                 <div className='relative w-full aspect-square mb-4 rounded-lg overflow-hidden bg-gray-100 border border-gray-200'>
                   {candidate?.imageUrl ? (
-                    <Image
-                      src={candidate.imageUrl}
-                      alt={candidate.name}
-                      fill
-                      className='object-cover'
-                      sizes='(max-width: 768px) 100vw, 300px'
-                    />
+                    <img src={candidate.imageUrl} alt={candidate.name} className='w-full h-full object-cover' />
                   ) : (
                     <div className='w-full h-full flex items-center justify-center'>
                       <User size={64} className='text-gray-400' />
@@ -274,7 +279,7 @@ export default function ScoringModal({
                 <button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className='w-full bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2'
+                  className='cursor-pointer w-full bg-gray-900 hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed text-white font-medium py-2.5 px-4 rounded-lg transition-colors flex items-center justify-center gap-2'
                 >
                   {submitting ? (
                     <>

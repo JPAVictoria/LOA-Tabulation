@@ -32,6 +32,11 @@ export async function GET() {
                 id: true,
                 username: true
               }
+            },
+            criteria: {
+              select: {
+                percentage: true
+              }
             }
           }
         }
@@ -71,7 +76,7 @@ export async function GET() {
 
     const totalCriteria = categories.reduce((sum, cat) => sum + cat.criteria.length, 0)
 
-    // Transform data to include scoring status
+    // Transform data to include scoring status and average score
     const candidatesWithStatus = candidates.map((candidate) => {
       // Group scores by judge
       const scoresByJudge = candidate.scores.reduce((acc, score) => {
@@ -97,6 +102,31 @@ export async function GET() {
         status = 'GRADED'
       }
 
+      // Calculate average score using the formula
+      let averageScore = null
+      if (candidate.scores.length > 0) {
+        // Group scores by criteria
+        const scoresByCriteria = {}
+        candidate.scores.forEach((score) => {
+          if (!scoresByCriteria[score.criteriaId]) {
+            scoresByCriteria[score.criteriaId] = {
+              scores: [],
+              percentage: parseFloat(score.criteria.percentage)
+            }
+          }
+          scoresByCriteria[score.criteriaId].scores.push(parseFloat(score.score))
+        })
+
+        // Calculate final score: sum of (average score per criteria × percentage / 100)
+        let finalScore = 0
+        Object.values(scoresByCriteria).forEach(({ scores, percentage }) => {
+          const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length
+          finalScore += (avgScore * percentage) / 100
+        })
+
+        averageScore = finalScore
+      }
+
       return {
         id: candidate.id,
         candidateNumber: candidate.candidateNumber,
@@ -107,7 +137,8 @@ export async function GET() {
         judgesWhoScored: judgesWhoFullyScored,
         totalJudges,
         scoredCount,
-        status
+        status,
+        averageScore
       }
     })
 
@@ -121,6 +152,109 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching pageant candidates:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch candidates' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
+  }
+}
+
+export async function POST(request) {
+  try {
+    const { judgeId, candidateId, scores } = await request.json()
+
+    // Validate required fields
+    if (!judgeId || !candidateId || !scores || !Array.isArray(scores)) {
+      return NextResponse.json({ success: false, error: 'Invalid request data' }, { status: 400 })
+    }
+
+    // Verify judge exists and is assigned to PAGEANTRY
+    const judge = await prisma.user.findFirst({
+      where: {
+        id: judgeId,
+        role: 'JUDGE',
+        assignedCompetition: 'PAGEANTRY',
+        deleted: false
+      }
+    })
+
+    if (!judge) {
+      return NextResponse.json({ success: false, error: 'Judge not found or not authorized' }, { status: 403 })
+    }
+
+    // Verify candidate exists and is in PAGEANTRY competition
+    const candidate = await prisma.candidate.findFirst({
+      where: {
+        id: candidateId,
+        competition: 'PAGEANTRY',
+        deleted: false
+      }
+    })
+
+    if (!candidate) {
+      return NextResponse.json({ success: false, error: 'Candidate not found' }, { status: 404 })
+    }
+
+    // Check if judge has already scored this candidate
+    const existingScores = await prisma.score.findFirst({
+      where: {
+        judgeId,
+        candidateId,
+        deleted: false
+      }
+    })
+
+    if (existingScores) {
+      return NextResponse.json(
+        { success: false, error: 'Scores already exist for this candidate. Use update instead.' },
+        { status: 409 }
+      )
+    }
+
+    // Validate all criteria exist and belong to PAGEANTRY
+    const criteriaIds = scores.map((s) => s.criteriaId)
+    const validCriteria = await prisma.criteria.findMany({
+      where: {
+        id: { in: criteriaIds },
+        deleted: false,
+        category: {
+          competition: 'PAGEANTRY',
+          deleted: false
+        }
+      }
+    })
+
+    if (validCriteria.length !== criteriaIds.length) {
+      return NextResponse.json({ success: false, error: 'Invalid criteria provided' }, { status: 400 })
+    }
+
+    // Validate score values
+    for (const score of scores) {
+      if (score.score < 0 || score.score > 100) {
+        return NextResponse.json({ success: false, error: 'Scores must be between 0 and 100' }, { status: 400 })
+      }
+    }
+
+    // Create all scores in a transaction
+    const createdScores = await prisma.$transaction(
+      scores.map((score) =>
+        prisma.score.create({
+          data: {
+            judgeId,
+            candidateId,
+            criteriaId: score.criteriaId,
+            score: score.score
+          }
+        })
+      )
+    )
+
+    return NextResponse.json({
+      success: true,
+      message: 'Scores submitted successfully',
+      scores: createdScores
+    })
+  } catch (error) {
+    console.error('Error submitting scores:', error)
+    return NextResponse.json({ success: false, error: 'Failed to submit scores' }, { status: 500 })
   } finally {
     await prisma.$disconnect()
   }

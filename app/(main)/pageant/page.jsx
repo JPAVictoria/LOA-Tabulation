@@ -28,7 +28,7 @@ export default function PageantCollegePage() {
         localStorage.setItem('judgeName', response.data.user.username)
 
         showToast('Login successful!', 'success')
-        setTimeout(() => router.push('/pageant-college/dashboard'), 1000)
+        setTimeout(() => router.push('/pageant/dashboard'), 1000)
       }
     } catch (error) {
       const errorMessage = error.response?.data?.message || 'Invalid username or password'

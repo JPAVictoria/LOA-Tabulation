@@ -1,10 +1,13 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { useRouter } from 'next/navigation'
+import { LogOut } from 'lucide-react'
 import { useToast } from '@/app/context/ToastContext'
 import ScoringTable from '@/app/modules/common/ScoringTable'
-import ScoringModal from '@/app/modules/common/ScoringModal'
+import PageantScoringModal from '@/app/modules/common/ScoringModal'
 import Footer from '@/app/modules/common/Footer'
+import { ShinyButton } from '@/components/ui/shiny-button'
 
 export default function PageantScoringPage() {
   const [candidates, setCandidates] = useState([])
@@ -13,15 +16,8 @@ export default function PageantScoringPage() {
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedCandidateId, setSelectedCandidateId] = useState(null)
-  const [judgeId, setJudgeId] = useState(null) // Get this from your login state/context
   const { showToast } = useToast()
-
-  useEffect(() => {
-    const storedJudgeId = localStorage.getItem('judgeId')
-    if (storedJudgeId) {
-      setJudgeId(parseInt(storedJudgeId))
-    }
-  }, [])
+  const router = useRouter()
 
   const fetchCandidates = async () => {
     try {
@@ -60,8 +56,24 @@ export default function PageantScoringPage() {
     fetchCandidates()
   }
 
+  const handleSignOut = () => {
+    localStorage.clear()
+    showToast('Signed out successfully', 'success')
+    router.push('/pageant')
+  }
+
   return (
     <>
+      {/* Sign Out Button */}
+      <div className='fixed top-4 left-4 z-50'>
+        <button
+          onClick={handleSignOut}
+          className='flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer'
+        >
+         <ShinyButton>Sign out</ShinyButton>
+        </button>
+      </div>
+
       <ScoringTable
         candidates={candidates}
         assignedJudges={assignedJudges}
@@ -70,12 +82,9 @@ export default function PageantScoringPage() {
         onGrade={handleGrade}
       />
 
-      <ScoringModal
+      <PageantScoringModal
         open={modalOpen}
         candidateId={selectedCandidateId}
-        judgeId={judgeId}
-        competition='PAGEANTRY'
-        apiEndpoint='/api/scoring/pageant'
         onClose={handleModalClose}
         onSuccess={handleModalSuccess}
         showToast={showToast}
