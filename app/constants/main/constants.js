@@ -5,34 +5,19 @@ export const COMPETITION_DATA = [
     link: '/pageant'
   },
   {
-    title: 'Pageant SHS',
-    src: '/main/pageant-shs.png',
-    link: '/pageant-shs'
-  },
-  {
     title: 'Singing',
     src: '/main/singing-main.png',
-    link: '/pageant-shs'
+    link: '/singing'
   },
   {
-    title: 'Dance Sport',
-    src: '/main/dancesport-main.png',
-    link: '/competition/camping-is-for-pross'
+    title: 'Flag Twirling',
+    src: '/main/flag-twirling.jpg',
+    link: '/flag-twirling'
   },
   {
     title: 'Hip-Hop',
     src: '/main/hiphop-main.png',
-    link: '/competition/the-road-not-tak22sen'
-  },
-  {
-    title: 'Cheerdance',
-    src: '/main/cheerdance-main.png',
-    link: '/competition/valley-of-life'
-  },
-  {
-    title: 'Bench Cheering',
-    src: '/main/bench-cheering-main.png',
-    link: '/pageant-college'
+    link: '/hiphop'
   },
   {
     title: 'Admin Page',
