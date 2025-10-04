@@ -4,7 +4,6 @@ import { supabaseServer } from '@/app/lib/supabaseClient'
 
 const prisma = new PrismaClient()
 
-// Helper function to delete image from storage
 const deleteImageFromStorage = async (imageUrl) => {
   if (!imageUrl) return
   try {
@@ -16,7 +15,6 @@ const deleteImageFromStorage = async (imageUrl) => {
   }
 }
 
-// Helper function to upload new image
 const uploadImage = async (image) => {
   const fileExt = image.name.split('.').pop()
   const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
@@ -55,18 +53,19 @@ export async function PUT(request, { params }) {
     const course = formData.get('course')
     const candidateNumber = parseInt(formData.get('candidateNumber'))
     const gender = formData.get('gender')
-    const competitionId = parseInt(formData.get('competitionId'))
+    const competition = formData.get('competition')
+    const level = formData.get('level')
     const image = formData.get('image')
+    const removeImage = formData.get('removeImage')
 
-    if (!name || !course || !candidateNumber || !gender || !competitionId) {
+    if (!name || !course || !candidateNumber || !gender || !competition || !level) {
       return NextResponse.json({ success: false, error: 'All fields except image are required' }, { status: 400 })
     }
 
-    // Check for duplicate candidate number
     const existing = await prisma.candidate.findFirst({
       where: {
         candidateNumber,
-        competitionId,
+        competition,
         deleted: false,
         id: { not: candidateId }
       }
@@ -79,10 +78,9 @@ export async function PUT(request, { params }) {
       )
     }
 
-    // Handle image logic
     let imageUrl = existingCandidate.imageUrl
 
-    if (image === 'remove') {
+    if (removeImage === 'true') {
       await deleteImageFromStorage(existingCandidate.imageUrl)
       imageUrl = null
     } else if (image && image.size > 0) {
@@ -92,14 +90,15 @@ export async function PUT(request, { params }) {
 
     const updatedCandidate = await prisma.candidate.update({
       where: { id: candidateId },
-      data: { name, course, candidateNumber, gender, imageUrl, competitionId },
-      include: { competition: true }
+      data: { name, course, candidateNumber, gender, competition, level, imageUrl }
     })
 
     return NextResponse.json({ success: true, candidate: updatedCandidate })
   } catch (error) {
     console.error('Error updating candidate:', error)
     return NextResponse.json({ success: false, error: 'Failed to update candidate' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -131,5 +130,7 @@ export async function DELETE(request, { params }) {
   } catch (error) {
     console.error('Error deleting candidate:', error)
     return NextResponse.json({ success: false, error: 'Failed to delete candidate' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }

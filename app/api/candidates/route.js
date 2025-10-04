@@ -11,26 +11,18 @@ export async function POST(request) {
     const course = formData.get('course')
     const candidateNumber = formData.get('candidateNumber')
     const gender = formData.get('gender')
-    const competitionId = formData.get('competitionId')
+    const competition = formData.get('competition')
+    const level = formData.get('level')
     const image = formData.get('image')
 
-    if (!name || !course || !candidateNumber || !gender || !competitionId) {
+    if (!name || !course || !candidateNumber || !gender || !competition || !level) {
       return NextResponse.json({ success: false, error: 'All fields except image are required' }, { status: 400 })
-    }
-
-    // Check if competition exists and is not deleted
-    const competition = await prisma.competition.findFirst({
-      where: { id: parseInt(competitionId), deleted: false }
-    })
-
-    if (!competition) {
-      return NextResponse.json({ success: false, error: 'Competition not found or has been deleted' }, { status: 400 })
     }
 
     const existing = await prisma.candidate.findFirst({
       where: {
         candidateNumber: parseInt(candidateNumber),
-        competitionId: parseInt(competitionId),
+        competition,
         deleted: false
       }
     })
@@ -48,8 +40,6 @@ export async function POST(request) {
       const fileExt = image.name.split('.').pop()
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`
       const filePath = `candidates/${fileName}`
-
-      // Convert File → Buffer
       const buffer = Buffer.from(await image.arrayBuffer())
 
       const { error: uploadError } = await supabaseServer.storage
@@ -70,29 +60,25 @@ export async function POST(request) {
         course,
         candidateNumber: parseInt(candidateNumber),
         gender,
-        imageUrl,
-        competitionId: parseInt(competitionId)
-      },
-      include: { competition: true }
+        competition,
+        level,
+        imageUrl
+      }
     })
 
     return NextResponse.json({ success: true, candidate }, { status: 201 })
   } catch (error) {
     console.error('Error creating candidate:', error)
     return NextResponse.json({ success: false, error: 'Failed to create candidate' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function GET() {
   try {
     const candidates = await prisma.candidate.findMany({
-      where: {
-        deleted: false,
-        competition: {
-          deleted: false
-        }
-      },
-      include: { competition: true },
+      where: { deleted: false },
       orderBy: { id: 'desc' }
     })
 
@@ -100,5 +86,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching candidates:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch candidates' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }

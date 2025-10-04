@@ -44,29 +44,8 @@ export default function CandidateTable() {
   }
 
   const handleEdit = async (updatedCandidate) => {
-    try {
-      const formData = new FormData()
-      formData.append('name', updatedCandidate.name)
-      formData.append('course', updatedCandidate.course)
-      formData.append('candidateNumber', updatedCandidate.candidateNumber.toString())
-      formData.append('gender', updatedCandidate.gender)
-      formData.append('competitionId', updatedCandidate.competitionId.toString())
-      if (updatedCandidate.image) formData.append('image', updatedCandidate.image)
-
-      const { data } = await axios.put(`/api/candidates/${selectedCandidate.id}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
-      })
-
-      if (data.success) {
-        showToast('Candidate updated successfully!', 'success')
-        await fetchCandidates()
-        closeModals()
-      } else {
-        showToast(data.error || 'Failed to update candidate', 'error')
-      }
-    } catch (error) {
-      showToast('Failed to update candidate', 'error')
-    }
+    await fetchCandidates()
+    closeModals()
   }
 
   const handleDelete = async () => {
@@ -89,7 +68,6 @@ export default function CandidateTable() {
   }
 
   const columns = [
-    { field: 'id', headerName: 'ID', width: 80, headerAlign: 'center', align: 'center' },
     {
       field: 'imageUrl',
       headerName: 'Photo',
@@ -143,8 +121,17 @@ export default function CandidateTable() {
     {
       field: 'competition',
       headerName: 'Competition',
-      width: 200,
-      renderCell: ({ value }) => <span>{value?.name || 'N/A'}</span>
+      width: 150,
+      renderCell: ({ value }) => (
+        <span>
+          {value
+            ? value
+                .replace(/_/g, ' ')
+                .toLowerCase()
+                .replace(/\b\w/g, (l) => l.toUpperCase())
+            : 'N/A'}
+        </span>
+      )
     },
     {
       field: 'level',
@@ -152,13 +139,13 @@ export default function CandidateTable() {
       width: 120,
       headerAlign: 'center',
       align: 'center',
-      renderCell: ({ row }) => (
+      renderCell: ({ value }) => (
         <span
           className={`px-2 py-1 rounded text-xs font-medium ${
-            row.competition?.level === 'COLLEGE' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
+            value === 'COLLEGE' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
           }`}
         >
-          {row.competition?.level === 'COLLEGE' ? 'College' : 'Senior High'}
+          {value === 'COLLEGE' ? 'College' : 'Senior High'}
         </span>
       )
     },

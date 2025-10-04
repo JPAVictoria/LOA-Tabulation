@@ -6,6 +6,7 @@ import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
 
 const genderOptions = ['MALE', 'FEMALE', 'OTHER']
+const levelOptions = ['COLLEGE', 'SENIOR_HIGH']
 
 export default function CandidateModal({ isOpen, onClose, onSubmit, editData = null }) {
   const [formData, setFormData] = useState({
@@ -13,7 +14,8 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
     course: '',
     candidateNumber: '',
     gender: null,
-    competitionId: null,
+    competition: null,
+    level: null,
     image: null
   })
   const [competitions, setCompetitions] = useState([])
@@ -33,7 +35,8 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
           course: editData.course || '',
           candidateNumber: editData.candidateNumber?.toString() || '',
           gender: editData.gender || null,
-          competitionId: editData.competitionId || null,
+          competition: editData.competition || null,
+          level: editData.level || null,
           image: null
         })
         setImagePreview(editData.imageUrl || null)
@@ -54,16 +57,24 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
   }
 
   const resetForm = () => {
-    setFormData({ name: '', course: '', candidateNumber: '', gender: null, competitionId: null, image: null })
+    setFormData({
+      name: '',
+      course: '',
+      candidateNumber: '',
+      gender: null,
+      competition: null,
+      level: null,
+      image: null
+    })
     setImagePreview(null)
     setRemoveExistingImage(false)
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const { name, course, candidateNumber, gender, competitionId, image } = formData
+    const { name, course, candidateNumber, gender, competition, level, image } = formData
 
-    if (!name.trim() || !course.trim() || !candidateNumber || !gender || !competitionId) {
+    if (!name.trim() || !course.trim() || !candidateNumber || !gender || !competition || !level) {
       return showToast('All fields except image are required', 'error')
     }
 
@@ -73,22 +84,34 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
 
     setLoading(true)
     try {
+      const formDataToSubmit = new FormData()
+      formDataToSubmit.append('name', name.trim())
+      formDataToSubmit.append('course', course.trim())
+      formDataToSubmit.append('candidateNumber', candidateNumber)
+      formDataToSubmit.append('gender', gender)
+      formDataToSubmit.append('competition', competition)
+      formDataToSubmit.append('level', level)
+
       if (isEditMode) {
-        await onSubmit({
-          name: name.trim(),
-          course: course.trim(),
-          candidateNumber: parseInt(candidateNumber),
-          gender,
-          competitionId,
-          image: removeExistingImage ? 'remove' : image
+        if (removeExistingImage) {
+          formDataToSubmit.append('removeImage', 'true')
+        } else if (image) {
+          formDataToSubmit.append('image', image)
+        }
+
+        const { data } = await axios.put(`/api/candidates/${editData.id}`, formDataToSubmit, {
+          headers: { 'Content-Type': 'multipart/form-data' }
         })
+
+        if (data.success) {
+          showToast('Candidate updated successfully!', 'success')
+          onSubmit(data.candidate)
+          resetForm()
+          onClose()
+        } else {
+          showToast(data.error || 'Failed to update candidate', 'error')
+        }
       } else {
-        const formDataToSubmit = new FormData()
-        formDataToSubmit.append('name', name.trim())
-        formDataToSubmit.append('course', course.trim())
-        formDataToSubmit.append('candidateNumber', candidateNumber)
-        formDataToSubmit.append('gender', gender)
-        formDataToSubmit.append('competitionId', competitionId.toString())
         if (image) formDataToSubmit.append('image', image)
 
         const { data } = await axios.post('/api/candidates', formDataToSubmit, {
@@ -138,7 +161,8 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
     formData.course.trim() &&
     formData.candidateNumber &&
     formData.gender &&
-    formData.competitionId
+    formData.competition &&
+    formData.level
 
   if (!isOpen) return null
 
@@ -218,11 +242,23 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
             <label className='block text-sm font-medium text-gray-700 mb-2'>Competition *</label>
             <Autocomplete
               options={competitions}
-              getOptionLabel={(option) => option.name}
-              value={competitions.find((comp) => comp.id === formData.competitionId) || null}
-              onChange={(e, value) => setFormData((prev) => ({ ...prev, competitionId: value?.id || null }))}
+              getOptionLabel={(option) => option.displayName}
+              value={competitions.find((comp) => comp.name === formData.competition) || null}
+              onChange={(e, value) => setFormData((prev) => ({ ...prev, competition: value?.name || null }))}
               disabled={loading}
               renderInput={(params) => <TextField {...params} placeholder='Select competition' />}
+            />
+          </div>
+
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>Level *</label>
+            <Autocomplete
+              options={levelOptions}
+              getOptionLabel={(option) => (option === 'COLLEGE' ? 'College' : 'Senior High')}
+              value={formData.level}
+              onChange={(e, value) => setFormData((prev) => ({ ...prev, level: value }))}
+              disabled={loading}
+              renderInput={(params) => <TextField {...params} placeholder='Select level' />}
             />
           </div>
 
