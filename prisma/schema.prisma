@@ -14,8 +14,7 @@ model User {
   role     Role
   deleted  Boolean @default(false)
 
-  competitionId Int?         
-  competition   Competition?  @relation(fields: [competitionId], references: [id])
+  assignedCompetition CompetitionType?
 
   scores   Score[]
 }
@@ -25,15 +24,11 @@ enum Role {
   JUDGE
 }
 
-model Competition {
-  id       Int       @id @default(autoincrement())
-  name     String
-  level    Level
-  deleted  Boolean   @default(false)
-
-  categories Category[]
-  candidates Candidate[]
-  judges     User[]
+enum CompetitionType {
+  FLAG_TWIRLING
+  PAGEANTRY
+  HIPHOP
+  SINGING
 }
 
 enum Level {
@@ -42,12 +37,11 @@ enum Level {
 }
 
 model Category {
-  id             Int       @id @default(autoincrement())
+  id             Int              @id @default(autoincrement())
   name           String
-  competitionId  Int
-  deleted        Boolean   @default(false)
+  competition    CompetitionType
+  deleted        Boolean          @default(false)
 
-  competition Competition @relation(fields: [competitionId], references: [id])
   criteria     Criteria[]
 }
 
@@ -63,16 +57,16 @@ model Criteria {
 }
 
 model Candidate {
-  id              Int       @id @default(autoincrement())
+  id              Int              @id @default(autoincrement())
   name            String
   course          String
   candidateNumber Int
   gender          Gender
   imageUrl        String?
-  competitionId   Int
-  deleted         Boolean   @default(false)
+  competition     CompetitionType
+  level           Level
+  deleted         Boolean          @default(false)
 
-  competition Competition @relation(fields: [competitionId], references: [id])
   scores      Score[]
 }
 

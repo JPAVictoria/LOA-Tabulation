@@ -5,17 +5,17 @@ const prisma = new PrismaClient()
 
 export async function PUT(request, { params }) {
   try {
-    const { id } = await params 
-    const { name, competitionId } = await request.json()
+    const { id } = await params
+    const { name, competition } = await request.json()
 
-    if (!name || !competitionId) {
+    if (!name || !competition) {
       return NextResponse.json({ success: false, error: 'Name and competition are required' }, { status: 400 })
     }
 
     const duplicate = await prisma.category.findFirst({
       where: {
         name,
-        competitionId: parseInt(competitionId),
+        competition,
         deleted: false,
         id: { not: parseInt(id) }
       }
@@ -30,19 +30,20 @@ export async function PUT(request, { params }) {
 
     const category = await prisma.category.update({
       where: { id: parseInt(id) },
-      data: { name, competitionId: parseInt(competitionId) },
-      include: { competition: true }
+      data: { name, competition }
     })
 
     return NextResponse.json({ success: true, category })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to update category' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function DELETE(request, { params }) {
   try {
-    const { id } = await params 
+    const { id } = await params
 
     await prisma.category.update({
       where: { id: parseInt(id) },
@@ -52,5 +53,7 @@ export async function DELETE(request, { params }) {
     return NextResponse.json({ success: true, message: 'Category deleted successfully' })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to delete category' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }

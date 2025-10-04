@@ -31,12 +31,14 @@ export async function POST(request) {
 
     const criteria = await prisma.criteria.create({
       data: { name, percentage: parseInt(percentage), categoryId: parseInt(categoryId) },
-      include: { category: { include: { competition: true } } }
+      include: { category: true }
     })
 
     return NextResponse.json({ success: true, criteria }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to create criteria' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -46,18 +48,17 @@ export async function GET() {
       where: {
         deleted: false,
         category: {
-          deleted: false, 
-          competition: {
-            deleted: false 
-          }
+          deleted: false
         }
       },
-      include: { category: { include: { competition: true } } },
+      include: { category: true },
       orderBy: { id: 'desc' }
     })
 
     return NextResponse.json({ success: true, criterias })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch criteria' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }

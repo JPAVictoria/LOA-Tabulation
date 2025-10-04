@@ -218,7 +218,7 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
             <label className='block text-sm font-medium text-gray-700 mb-2'>Competition *</label>
             <Autocomplete
               options={competitions}
-              getOptionLabel={(option) => `${option.name} (${option.level})`}
+              getOptionLabel={(option) => option.name}
               value={competitions.find((comp) => comp.id === formData.competitionId) || null}
               onChange={(e, value) => setFormData((prev) => ({ ...prev, competitionId: value?.id || null }))}
               disabled={loading}

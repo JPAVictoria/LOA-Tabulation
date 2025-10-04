@@ -5,14 +5,14 @@ const prisma = new PrismaClient()
 
 export async function POST(request) {
   try {
-    const { name, competitionId } = await request.json()
+    const { name, competition } = await request.json()
 
-    if (!name || !competitionId) {
+    if (!name || !competition) {
       return NextResponse.json({ success: false, error: 'Name and competition are required' }, { status: 400 })
     }
 
     const existing = await prisma.category.findFirst({
-      where: { name, competitionId, deleted: false }
+      where: { name, competition, deleted: false }
     })
 
     if (existing) {
@@ -23,27 +23,22 @@ export async function POST(request) {
     }
 
     const category = await prisma.category.create({
-      data: { name, competitionId },
-      include: { competition: true }
+      data: { name, competition }
     })
 
     return NextResponse.json({ success: true, category }, { status: 201 })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to create category' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function GET() {
   try {
     const categories = await prisma.category.findMany({
-      where: {
-        deleted: false,
-        competition: {
-          deleted: false
-        }
-      },
+      where: { deleted: false },
       include: {
-        competition: true,
         criteria: {
           where: { deleted: false }
         }
@@ -54,11 +49,13 @@ export async function GET() {
     const categoriesWithCount = categories.map((cat) => ({
       ...cat,
       criteriaCount: cat.criteria.length,
-      criteria: undefined 
+      criteria: undefined
     }))
 
     return NextResponse.json({ success: true, categories: categoriesWithCount })
   } catch (error) {
     return NextResponse.json({ success: false, error: 'Failed to fetch categories' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }

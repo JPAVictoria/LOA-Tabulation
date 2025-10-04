@@ -194,7 +194,10 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit, editData = nu
             <Autocomplete
               options={categories}
               getOptionLabel={(option) =>
-                `${option.name} (${option.competition.name}) - ${option.criteriaCount || 0} criterias assigned`
+                `${option.name} (${option.competition
+                  .replace(/_/g, ' ')
+                  .toLowerCase()
+                  .replace(/\b\w/g, (l) => l.toUpperCase())}) - ${option.criteriaCount || 0} criterias assigned`
               }
               value={categories.find((cat) => cat.id === formData.categoryId) || null}
               onChange={handleCategoryChange}

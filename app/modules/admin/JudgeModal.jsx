@@ -9,7 +9,7 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
   const [formData, setFormData] = useState({
     username: '',
     password: '',
-    competitionId: null
+    competition: null
   })
   const [competitions, setCompetitions] = useState([])
   const [isLoading, setIsLoading] = useState(false)
@@ -27,10 +27,10 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
         setFormData({
           username: editData.username,
           password: '', // Leave blank in edit mode - user can optionally update it
-          competitionId: editData.competitionId
+          competition: editData.assignedCompetition
         })
       } else {
-        setFormData({ username: '', password: '', competitionId: null })
+        setFormData({ username: '', password: '', competition: null })
       }
     }
   }, [isOpen, editData])
@@ -53,7 +53,7 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
     e.preventDefault()
 
     // Validation: password required only for create mode
-    if (!formData.username.trim() || !formData.competitionId) {
+    if (!formData.username.trim() || !formData.competition) {
       return showToast('Username and competition are required', 'error')
     }
 
@@ -70,13 +70,13 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
         const { data } = await axios.post('/api/judges', {
           username: formData.username.trim(),
           password: formData.password.trim(),
-          competitionId: parseInt(formData.competitionId)
+          assignedCompetition: formData.competition
         })
 
         if (data.success) {
           showToast('Judge created successfully!', 'success')
           onSubmit?.(data.judge)
-          setFormData({ username: '', password: '', competitionId: null })
+          setFormData({ username: '', password: '', competition: null })
           onClose?.()
         } else {
           showToast(data.error || 'Failed to create judge', 'error')
@@ -93,13 +93,9 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const handleCompetitionChange = (event, newValue) => {
-    setFormData((prev) => ({ ...prev, competitionId: newValue?.id || null }))
-  }
-
   const handleClose = () => {
     if (!isLoading) {
-      setFormData({ username: '', password: '', competitionId: null })
+      setFormData({ username: '', password: '', competition: null })
       onClose?.()
     }
   }
@@ -180,9 +176,9 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Competition *</label>
             <Autocomplete
               options={competitions}
-              getOptionLabel={(option) => `${option.name} (${option.level})`}
-              value={competitions.find((comp) => comp.id === formData.competitionId) || null}
-              onChange={handleCompetitionChange}
+              getOptionLabel={(option) => option.displayName}
+              value={competitions.find((comp) => comp.name === formData.competition) || null}
+              onChange={(e, value) => setFormData((prev) => ({ ...prev, competition: value?.name || null }))}
               disabled={isLoading || isLoadingCompetitions}
               loading={isLoadingCompetitions}
               renderInput={(params) => (
@@ -230,7 +226,7 @@ export default function JudgeModal({ isOpen, onClose, onSubmit, editData = null 
               disabled={
                 isLoading ||
                 !formData.username.trim() ||
-                !formData.competitionId ||
+                !formData.competition ||
                 (!isEditMode && !formData.password.trim())
               }
               className='cursor-pointer flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 via-yellow-400 to-amber-300 

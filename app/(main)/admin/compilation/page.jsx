@@ -3,7 +3,6 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { Chip } from '@mui/material'
 import { ADMIN_DASHBOARD_DATA } from '@/app/constants/admin/constants'
-import CompetitionTable from '@/app/modules/admin/CompetitionTable'
 import CategoryTable from '@/app/modules/admin/CategoryTable'
 import CriteriaTable from '@/app/modules/admin/CriteriaTable'
 import CandidateTable from '@/app/modules/admin/CandidateTable'
@@ -12,7 +11,7 @@ import Footer from '@/app/modules/common/Footer'
 import { ShinyButton } from '@/components/ui/shiny-button'
 
 export default function AdminCompilation() {
-  const [selectedChip, setSelectedChip] = useState('competition')
+  const [selectedChip, setSelectedChip] = useState('category')
 
   const handleChipClick = (chipId) => {
     setSelectedChip(chipId)
@@ -20,8 +19,6 @@ export default function AdminCompilation() {
 
   const renderContent = () => {
     switch (selectedChip) {
-      case 'competition':
-        return <CompetitionTable />
       case 'category':
         return <CategoryTable />
       case 'criteria':
@@ -31,7 +28,7 @@ export default function AdminCompilation() {
       case 'judges':
         return <JudgeTable />
       default:
-        return <CompetitionTable />
+        return <CategoryTable />
     }
   }
 

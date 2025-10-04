@@ -23,12 +23,15 @@ export async function PUT(request, { params }) {
         percentage: parseInt(percentage),
         categoryId: parseInt(categoryId)
       },
-      include: { category: { include: { competition: true } } }
+      include: { category: true } // Removed competition include
     })
 
     return NextResponse.json({ success: true, criteria })
   } catch (error) {
+    console.error('Update criteria error:', error)
     return NextResponse.json({ success: false, error: 'Failed to update criteria' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
@@ -43,6 +46,9 @@ export async function DELETE(request, { params }) {
 
     return NextResponse.json({ success: true })
   } catch (error) {
+    console.error('Delete criteria error:', error)
     return NextResponse.json({ success: false, error: 'Failed to delete criteria' }, { status: 500 })
+  } finally {
+    await prisma.$disconnect()
   }
 }

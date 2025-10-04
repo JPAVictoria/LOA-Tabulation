@@ -47,7 +47,7 @@ export default function CategoryTable() {
     try {
       const { data } = await axios.put(`/api/categories/${selectedCategory.id}`, {
         name: updatedCategory.name,
-        competitionId: updatedCategory.competitionId
+        competition: updatedCategory.competition
       })
 
       if (data.success) {
@@ -89,23 +89,14 @@ export default function CategoryTable() {
       headerName: 'Competition',
       flex: 1,
       minWidth: 200,
-      renderCell: ({ value }) => <span className='text-gray-900 dark:text-gray-100'>{value?.name || 'N/A'}</span>
-    },
-    {
-      field: 'competitionLevel',
-      headerName: 'Level',
-      width: 120,
-      headerAlign: 'center',
-      align: 'center',
-      renderCell: ({ row }) => (
-        <span
-          className={`px-2 py-1 rounded text-xs font-medium ${
-            row.competition?.level === 'COLLEGE'
-              ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-              : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-          }`}
-        >
-          {row.competition?.level === 'COLLEGE' ? 'College' : 'Senior High'}
+      renderCell: ({ value }) => (
+        <span className='text-gray-900 dark:text-gray-100'>
+          {value
+            ? value
+                .replace(/_/g, ' ')
+                .toLowerCase()
+                .replace(/\b\w/g, (l) => l.toUpperCase())
+            : 'N/A'}
         </span>
       )
     },

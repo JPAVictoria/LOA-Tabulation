@@ -6,7 +6,7 @@ import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
 
 export default function CategoryModal({ isOpen, onClose, onSubmit, editData = null }) {
-  const [formData, setFormData] = useState({ name: '', competitionId: null })
+  const [formData, setFormData] = useState({ name: '', competition: null })
   const [competitions, setCompetitions] = useState([])
   const [isLoading, setIsLoading] = useState(false)
   const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(false)
@@ -21,10 +21,10 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
       if (editData) {
         setFormData({
           name: editData.name,
-          competitionId: editData.competitionId
+          competition: editData.competition
         })
       } else {
-        setFormData({ name: '', competitionId: null })
+        setFormData({ name: '', competition: null })
       }
     }
   }, [isOpen, editData])
@@ -46,7 +46,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    if (!formData.name.trim() || !formData.competitionId) {
+    if (!formData.name.trim() || !formData.competition) {
       return showToast('All fields are required', 'error')
     }
 
@@ -56,13 +56,13 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
       if (isEditMode) {
         const { data } = await axios.put(`/api/categories/${editData.id}`, {
           name: formData.name.trim(),
-          competitionId: parseInt(formData.competitionId)
+          competition: formData.competition // Remove parseInt()
         })
 
         if (data.success) {
           showToast('Category updated successfully!', 'success')
           onSubmit?.(data.category)
-          setFormData({ name: '', competitionId: null })
+          setFormData({ name: '', competition: null })
           onClose?.()
         } else {
           showToast(data.error || 'Failed to update category', 'error')
@@ -70,13 +70,13 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
       } else {
         const { data } = await axios.post('/api/categories', {
           name: formData.name.trim(),
-          competitionId: parseInt(formData.competitionId)
+          competition: formData.competition // Remove parseInt()
         })
 
         if (data.success) {
           showToast('Category created successfully!', 'success')
           onSubmit?.(data.category)
-          setFormData({ name: '', competitionId: null })
+          setFormData({ name: '', competition: null })
           onClose?.()
         } else {
           showToast(data.error || 'Failed to create category', 'error')
@@ -93,13 +93,9 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
   }
 
-  const handleCompetitionChange = (event, newValue) => {
-    setFormData((prev) => ({ ...prev, competitionId: newValue?.id || null }))
-  }
-
   const handleClose = () => {
     if (!isLoading) {
-      setFormData({ name: '', competitionId: null })
+      setFormData({ name: '', competition: null })
       onClose?.()
     }
   }
@@ -153,9 +149,9 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Competition *</label>
             <Autocomplete
               options={competitions}
-              getOptionLabel={(option) => `${option.name} (${option.level})`}
-              value={competitions.find((comp) => comp.id === formData.competitionId) || null}
-              onChange={handleCompetitionChange}
+              getOptionLabel={(option) => option.displayName}
+              value={competitions.find((comp) => comp.name === formData.competition) || null}
+              onChange={(e, value) => setFormData((prev) => ({ ...prev, competition: value?.name || null }))}
               disabled={isLoading || isLoadingCompetitions}
               loading={isLoadingCompetitions}
               renderInput={(params) => (
@@ -200,7 +196,7 @@ export default function CategoryModal({ isOpen, onClose, onSubmit, editData = nu
             </button>
             <button
               type='submit'
-              disabled={isLoading || !formData.name.trim() || !formData.competitionId}
+              disabled={isLoading || !formData.name.trim() || !formData.competition}
               className='cursor-pointer flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 via-blue-500 to-purple-400 
                        dark:from-blue-400 dark:via-blue-300 dark:to-purple-200 text-white rounded-xl 
                        hover:shadow-lg transition-all font-medium flex items-center justify-center gap-2

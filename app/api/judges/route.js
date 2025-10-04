@@ -9,9 +9,6 @@ export async function GET() {
       where: {
         role: 'JUDGE',
         deleted: false
-      },
-      include: {
-        competition: true
       }
     })
 
@@ -27,22 +24,21 @@ export async function GET() {
       },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
 
 export async function POST(request) {
   try {
-    const { username, password, competitionId } = await request.json()
+    const { username, password, assignedCompetition } = await request.json()
 
     const judge = await prisma.user.create({
       data: {
         username,
         password,
         role: 'JUDGE',
-        competitionId
-      },
-      include: {
-        competition: true
+        assignedCompetition
       }
     })
 
@@ -58,5 +54,7 @@ export async function POST(request) {
       },
       { status: 500 }
     )
+  } finally {
+    await prisma.$disconnect()
   }
 }
