@@ -18,17 +18,6 @@ export async function POST(request) {
       return NextResponse.json({ success: false, error: 'Percentage must be between 1 and 100' }, { status: 400 })
     }
 
-    const existing = await prisma.criteria.findFirst({
-      where: { name, categoryId, deleted: false }
-    })
-
-    if (existing) {
-      return NextResponse.json(
-        { success: false, error: 'Criteria with this name already exists in this category' },
-        { status: 400 }
-      )
-    }
-
     const criteria = await prisma.criteria.create({
       data: { name, percentage: parseInt(percentage), categoryId: parseInt(categoryId) },
       include: { category: true }

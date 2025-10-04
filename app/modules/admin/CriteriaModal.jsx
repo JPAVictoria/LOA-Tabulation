@@ -51,9 +51,9 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit, editData = nu
       return showToast('All fields are required', 'error')
     }
 
-    const percentage = parseInt(formData.percentage)
-    if (percentage < 1 || percentage > 100) {
-      return showToast('Percentage must be between 1 and 100', 'error')
+    const percentage = parseFloat(formData.percentage)
+    if (isNaN(percentage) || percentage <= 0 || percentage > 100) {
+      return showToast('Percentage must be between 0 and 100', 'error')
     }
 
     setIsLoading(true)
@@ -105,10 +105,11 @@ export default function CriteriaModal({ isOpen, onClose, onSubmit, editData = nu
   const handleChange = (e) => {
     const { name, value } = e.target
     if (name === 'percentage') {
-      const numValue = value.replace(/[^0-9]/g, '')
-      if (numValue === '' || (parseInt(numValue) >= 1 && parseInt(numValue) <= 100)) {
-        setFormData((prev) => ({ ...prev, [name]: numValue }))
-      }
+      // Allow numbers with decimals
+      const numValue = value.replace(/[^0-9.]/g, '')
+      // Prevent multiple decimals
+      const cleanValue = numValue.replace(/(\..*)\./g, '$1')
+      setFormData((prev) => ({ ...prev, [name]: cleanValue }))
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }))
     }

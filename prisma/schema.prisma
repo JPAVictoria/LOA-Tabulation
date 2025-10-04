@@ -48,7 +48,7 @@ model Category {
 model Criteria {
   id         Int      @id @default(autoincrement())
   name       String
-  percentage Int
+  percentage Decimal?         @db.Decimal(5, 2)
   categoryId Int
   deleted    Boolean  @default(false)
 
