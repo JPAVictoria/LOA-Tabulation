@@ -107,8 +107,8 @@ export async function GET() {
       let averageScore = null
       if (candidate.scores.length > 0) {
         // Group scores by category, then by criteria
+        // STEP 1: Group scores by category, then by criteria (Lines 100-118)
         const scoresByCategory = {}
-
         candidate.scores.forEach((score) => {
           const categoryId = score.criteria.categoryId
 
@@ -126,20 +126,21 @@ export async function GET() {
           scoresByCategory[categoryId][score.criteriaId].scores.push(parseFloat(score.score))
         })
 
-        // Calculate score for each category
+        // STEP 2: Calculate weighted score for each category
         const categoryScores = []
         Object.values(scoresByCategory).forEach((criteriasInCategory) => {
           let categoryScore = 0
 
+          // For each criteria in this category:
           Object.values(criteriasInCategory).forEach(({ scores, percentage }) => {
-            const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length
-            categoryScore += (avgScore * percentage) / 100
+            const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length // Average judges' scores
+            categoryScore += (avgScore * percentage) / 100 // Apply percentage weight
           })
 
-          categoryScores.push(categoryScore)
+          categoryScores.push(categoryScore) // Store this category's score
         })
 
-        // Average all category scores (equal weight per category)
+        // STEP 3: Average all category scores
         averageScore = categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
       }
 
