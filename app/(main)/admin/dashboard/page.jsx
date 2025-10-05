@@ -42,7 +42,7 @@ export default function AdminDashboard() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-20'>
-          {ADMIN_DASHBOARD_DATA.map((item) => {
+          {ADMIN_DASHBOARD_DATA.filter((item) => !item.hidden).map((item) => {
             const Icon = item.icon
             return (
               <button

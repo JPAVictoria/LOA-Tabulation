@@ -9,6 +9,7 @@ import CandidateTable from '@/app/modules/admin/CandidateTable'
 import JudgeTable from '@/app/modules/admin/JudgeTable'
 import Footer from '@/app/modules/common/Footer'
 import { ShinyButton } from '@/components/ui/shiny-button'
+import ViewScoresTable from '@/app/modules/admin/ViewScoresTable'
 
 export default function AdminCompilation() {
   const [selectedChip, setSelectedChip] = useState('category')
@@ -27,6 +28,8 @@ export default function AdminCompilation() {
         return <CandidateTable />
       case 'judges':
         return <JudgeTable />
+      case 'scores':
+        return <ViewScoresTable />
       default:
         return <CategoryTable />
     }
