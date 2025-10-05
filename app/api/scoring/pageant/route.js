@@ -35,7 +35,8 @@ export async function GET() {
             },
             criteria: {
               select: {
-                percentage: true
+                percentage: true,
+                categoryId: true
               }
             }
           }
@@ -102,29 +103,44 @@ export async function GET() {
         status = 'GRADED'
       }
 
-      // Calculate average score using the formula
+      // Calculate average score using Option A: Equal category weight
       let averageScore = null
       if (candidate.scores.length > 0) {
-        // Group scores by criteria
-        const scoresByCriteria = {}
+        // Group scores by category, then by criteria
+        const scoresByCategory = {}
+
         candidate.scores.forEach((score) => {
-          if (!scoresByCriteria[score.criteriaId]) {
-            scoresByCriteria[score.criteriaId] = {
+          const categoryId = score.criteria.categoryId
+
+          if (!scoresByCategory[categoryId]) {
+            scoresByCategory[categoryId] = {}
+          }
+
+          if (!scoresByCategory[categoryId][score.criteriaId]) {
+            scoresByCategory[categoryId][score.criteriaId] = {
               scores: [],
               percentage: parseFloat(score.criteria.percentage)
             }
           }
-          scoresByCriteria[score.criteriaId].scores.push(parseFloat(score.score))
+
+          scoresByCategory[categoryId][score.criteriaId].scores.push(parseFloat(score.score))
         })
 
-        // Calculate final score: sum of (average score per criteria × percentage / 100)
-        let finalScore = 0
-        Object.values(scoresByCriteria).forEach(({ scores, percentage }) => {
-          const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length
-          finalScore += (avgScore * percentage) / 100
+        // Calculate score for each category
+        const categoryScores = []
+        Object.values(scoresByCategory).forEach((criteriasInCategory) => {
+          let categoryScore = 0
+
+          Object.values(criteriasInCategory).forEach(({ scores, percentage }) => {
+            const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length
+            categoryScore += (avgScore * percentage) / 100
+          })
+
+          categoryScores.push(categoryScore)
         })
 
-        averageScore = finalScore
+        // Average all category scores (equal weight per category)
+        averageScore = categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
       }
 
       return {
@@ -228,8 +244,8 @@ export async function POST(request) {
 
     // Validate score values
     for (const score of scores) {
-      if (score.score < 0 || score.score > 100) {
-        return NextResponse.json({ success: false, error: 'Scores must be between 0 and 100' }, { status: 400 })
+      if (score.score < 65 || score.score > 100) {
+        return NextResponse.json({ success: false, error: 'Scores must be between 65 and 100' }, { status: 400 })
       }
     }
 

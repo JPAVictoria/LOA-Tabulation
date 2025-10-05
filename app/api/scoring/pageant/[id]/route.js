@@ -147,8 +147,8 @@ export async function PUT(request, { params }) {
 
     // Validate score values
     for (const score of scores) {
-      if (score.score < 0 || score.score > 100) {
-        return NextResponse.json({ success: false, error: 'Scores must be between 0 and 100' }, { status: 400 })
+      if (score.score < 65 || score.score > 100) {
+        return NextResponse.json({ success: false, error: 'Scores must be between 65 and 100' }, { status: 400 })
       }
     }
 

@@ -74,9 +74,9 @@ export default function ScoringModal({ open, candidateId, onClose, onSuccess, sh
         continue
       }
 
-      if (score < 0 || score > 100) {
+      if (score < 65 || score > 100) {
         const criteria = categories.flatMap((cat) => cat.criteria).find((c) => c.id === parseInt(criteriaId))
-        showToast?.(`Score for "${criteria?.name}" must be between 0 and 100`, 'error')
+        showToast?.(`Score for "${criteria?.name}" must be between 65 and 100`, 'error')
         return false
       }
     }
@@ -238,9 +238,9 @@ export default function ScoringModal({ open, candidateId, onClose, onSuccess, sh
                               type='number'
                               value={scores[criteria.id] ?? ''}
                               onChange={(e) => handleScoreChange(criteria.id, e.target.value)}
-                              placeholder='0-100'
+                              placeholder='65-100'
                               inputProps={{
-                                min: 0,
+                                min: 65,
                                 max: 100,
                                 step: 0.01
                               }}
