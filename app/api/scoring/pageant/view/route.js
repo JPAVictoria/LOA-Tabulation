@@ -73,50 +73,66 @@ export async function GET() {
 
     const totalCriteria = categories.reduce((sum, cat) => sum + cat.criteria.length, 0)
 
-    // Transform data to include average score calculation
+    // Transform data - calculate score PER JUDGE (NO averaging across judges)
     const candidatesWithAverages = candidates.map((candidate) => {
-      let averageScore = null
+      if (candidate.scores.length === 0) {
+        return {
+          ...candidate,
+          averageScore: null
+        }
+      }
 
-      if (candidate.scores.length > 0) {
-        // Group scores by category
-        const scoresByCategory = {}
-        candidate.scores.forEach((score) => {
-          const categoryId = score.criteria.categoryId
+      // Group scores by JUDGE first, then by category, then by criteria
+      const scoresByJudge = {}
+      candidate.scores.forEach((score) => {
+        const judgeId = score.judgeId
+        const categoryId = score.criteria.categoryId
 
-          if (!scoresByCategory[categoryId]) {
-            scoresByCategory[categoryId] = {}
-          }
+        if (!scoresByJudge[judgeId]) {
+          scoresByJudge[judgeId] = {}
+        }
 
-          if (!scoresByCategory[categoryId][score.criteriaId]) {
-            scoresByCategory[categoryId][score.criteriaId] = {
-              scores: [],
-              percentage: parseFloat(score.criteria.percentage)
-            }
-          }
+        if (!scoresByJudge[judgeId][categoryId]) {
+          scoresByJudge[judgeId][categoryId] = {}
+        }
 
-          scoresByCategory[categoryId][score.criteriaId].scores.push(parseFloat(score.score))
-        })
+        scoresByJudge[judgeId][categoryId][score.criteriaId] = {
+          score: parseFloat(score.score),
+          percentage: parseFloat(score.criteria.percentage)
+        }
+      })
+
+      // Calculate score for each judge separately
+      Object.keys(scoresByJudge).forEach((judgeId) => {
+        const judgeCategories = scoresByJudge[judgeId]
 
         // Calculate weighted score for each category
         const categoryScores = []
-        Object.values(scoresByCategory).forEach((criteriasInCategory) => {
+        Object.values(judgeCategories).forEach((criteriasInCategory) => {
           let categoryScore = 0
 
-          Object.values(criteriasInCategory).forEach(({ scores, percentage }) => {
-            const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length
-            categoryScore += (avgScore * percentage) / 100
+          // For each criteria: score × (percentage / 100)
+          Object.values(criteriasInCategory).forEach(({ score, percentage }) => {
+            categoryScore += (score * percentage) / 100
           })
 
           categoryScores.push(categoryScore)
         })
 
-        // Average all category scores
-        averageScore = categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
-      }
+        // Average all category scores: Σ(categoryScores) / number of categories
+        scoresByJudge[judgeId].averageScore =
+          categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
+      })
+
+      // Attach the judge-specific average to each score
+      const scoresWithAverage = candidate.scores.map((score) => ({
+        ...score,
+        averageScore: scoresByJudge[score.judgeId].averageScore
+      }))
 
       return {
         ...candidate,
-        averageScore
+        scores: scoresWithAverage
       }
     })
 

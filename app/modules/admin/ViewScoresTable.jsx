@@ -68,7 +68,7 @@ export default function ViewScoresTable() {
                 course: candidate.course,
                 judgeName: score.judge.username,
                 categoryScores: {},
-                averageScore: candidate.averageScore
+                averageScore: score.averageScore
               }
             }
 
