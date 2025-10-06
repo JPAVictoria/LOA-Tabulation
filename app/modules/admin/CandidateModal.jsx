@@ -6,7 +6,7 @@ import axios from 'axios'
 import { useToast } from '@/app/context/ToastContext'
 
 const genderOptions = ['MALE', 'FEMALE', 'OTHER']
-const levelOptions = ['COLLEGE', 'SENIOR_HIGH']
+const levelOptions = ['COLLEGE', 'SENIOR_HIGH', 'BASIC_EDUCATION']
 
 export default function CandidateModal({ isOpen, onClose, onSubmit, editData = null }) {
   const [formData, setFormData] = useState({
@@ -254,7 +254,18 @@ export default function CandidateModal({ isOpen, onClose, onSubmit, editData = n
             <label className='block text-sm font-medium text-gray-700 mb-2'>Level *</label>
             <Autocomplete
               options={levelOptions}
-              getOptionLabel={(option) => (option === 'COLLEGE' ? 'College' : 'Senior High')}
+              getOptionLabel={(option) => {
+                switch (option) {
+                  case 'BASIC_EDUCATION':
+                    return 'Basic Education'
+                  case 'SENIOR_HIGH':
+                    return 'Senior High'
+                  case 'COLLEGE':
+                    return 'College'
+                  default:
+                    return ''
+                }
+              }}
               value={formData.level}
               onChange={(e, value) => setFormData((prev) => ({ ...prev, level: value }))}
               disabled={loading}

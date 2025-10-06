@@ -8,6 +8,6 @@ export const PAGEANT_COLLEGE_LOGIN_DATA = {
 
   content: {
     mainTitle: 'Lyceum of Alabang',
-    subtitle: 'Pageant College Division'
+    subtitle: 'Pageantry'
   }
 }
