@@ -1,8 +1,10 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
-import { Chip } from '@mui/material'
 import axios from 'axios'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
+import { ShinyButton } from '@/components/ui/shiny-button'
 
 export default function ViewScoresTable() {
   const [rows, setRows] = useState([])
@@ -34,6 +36,30 @@ export default function ViewScoresTable() {
       align: 'center'
     }
   ])
+
+  const exportToExcel = () => {
+    if (!rows || rows.length === 0) return alert('No data to export.')
+
+    // Flatten rows for Excel
+    const exportData = rows.map((row) => {
+      const flatRow = {}
+      columns.forEach((col) => {
+        const header = col.headerName || col.field
+        flatRow[header] = row[col.field] || ''
+      })
+      return flatRow
+    })
+
+    // Create worksheet and workbook
+    const worksheet = XLSX.utils.json_to_sheet(exportData)
+    const workbook = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Scores')
+
+    // Generate Excel file and trigger download
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
+    saveAs(blob, 'PageantScores.xlsx')
+  }
 
   useEffect(() => {
     fetchScoresData()
@@ -179,6 +205,12 @@ export default function ViewScoresTable() {
     <div className='mt-6 flex flex-col items-center justify-center p-4'>
       <div className='w-full max-w-full px-4'>
         <div className='h-[500px] w-full'>
+          <div className='flex justify-end mb-3 w-full'>
+            <button onClick={exportToExcel}>
+              <ShinyButton>Export to Excel</ShinyButton>
+            </button>
+          </div>
+
           <DataGrid
             rows={rows}
             columns={columns}
