@@ -129,9 +129,9 @@ export default function ViewScoresTable() {
             scores.forEach(({ score, percentage }) => {
               categoryScore += (score * percentage) / 100
             })
-            row[`category_${categoryName}`] = categoryScore.toFixed(2)
+            row[`category_${categoryName}`] = categoryScore
           })
-
+          row.averageScore = item.averageScore || null
           transformedRows.push(row)
         })
 
@@ -177,7 +177,9 @@ export default function ViewScoresTable() {
             headerAlign: 'center',
             align: 'center',
             renderCell: ({ value }) => (
-              <span className='font-semibold text-blue-600 dark:text-blue-400'>{value || '-'}</span>
+              <span className='font-semibold text-blue-600 dark:text-blue-400'>
+                {value !== null && value !== undefined ? value.toFixed(2) : '-'}
+              </span>
             )
           })
         })
@@ -189,7 +191,11 @@ export default function ViewScoresTable() {
           width: 130,
           headerAlign: 'center',
           align: 'center',
-          renderCell: ({ value }) => <span className='font-bold text-green-600 dark:text-green-400'>{value}</span>
+          renderCell: ({ value }) => (
+            <span className='font-bold text-green-600 dark:text-green-400'>
+              {value !== null && value !== undefined ? value.toFixed(2) : '-'}
+            </span>
+          )
         })
 
         setColumns(dynamicColumns)
