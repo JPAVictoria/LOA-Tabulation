@@ -2,89 +2,84 @@
 import React, { useState, useEffect } from 'react'
 import { DataGrid } from '@mui/x-data-grid'
 import axios from 'axios'
-import * as XLSX from 'xlsx'
-import { saveAs } from 'file-saver'
-import { ShinyButton } from '@/components/ui/shiny-button'
+import { Select, MenuItem, FormControl, InputLabel, TextField, Box, Button } from '@mui/material'
+import { FilterX } from 'lucide-react'
+import ExcelExportButton from './ExcelExportButton'
 
-export default function ViewScoresTable() {
+export default function ViewScoresTable({ competition = 'pageantry' }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [columns, setColumns] = useState([
-    {
-      field: 'candidateNumber',
-      headerName: 'Candidate No.',
-      width: 130,
-      headerAlign: 'center',
-      align: 'center'
-    },
-    {
-      field: 'candidateName',
-      headerName: 'Candidate Name',
-      flex: 1,
-      minWidth: 180
-    },
-    {
-      field: 'course',
-      headerName: 'Course',
-      width: 150
-    },
-    {
-      field: 'judgeName',
-      headerName: 'Judge Name',
-      width: 150,
-      headerAlign: 'center',
-      align: 'center'
-    }
-  ])
-
-  const exportToExcel = () => {
-    if (!rows || rows.length === 0) return alert('No data to export.')
-
-    // Flatten rows for Excel
-    const exportData = rows.map((row) => {
-      const flatRow = {}
-      columns.forEach((col) => {
-        const header = col.headerName || col.field
-        flatRow[header] = row[col.field] || ''
-      })
-      return flatRow
-    })
-
-    // Create worksheet and workbook
-    const worksheet = XLSX.utils.json_to_sheet(exportData)
-    const workbook = XLSX.utils.book_new()
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Scores')
-
-    // Generate Excel file and trigger download
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
-    const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
-    saveAs(blob, 'PageantScores.xlsx')
-  }
+  const [columns, setColumns] = useState([])
+  const [judges, setJudges] = useState([])
+  const [filters, setFilters] = useState({
+    gender: '',
+    candidateNumber: '',
+    judgeName: ''
+  })
+  const [filteredRows, setFilteredRows] = useState([])
 
   useEffect(() => {
     fetchScoresData()
-  }, [])
+  }, [competition])
+
+  useEffect(() => {
+    applyFilters()
+  }, [filters, rows])
+
+  const applyFilters = () => {
+    let filtered = [...rows]
+
+    if (filters.gender) {
+      filtered = filtered.filter((row) => row.gender === filters.gender)
+    }
+
+    if (filters.candidateNumber) {
+      filtered = filtered.filter((row) => row.candidateNumber.toString().includes(filters.candidateNumber))
+    }
+
+    if (filters.judgeName) {
+      filtered = filtered.filter((row) => row.judgeName === filters.judgeName)
+    }
+
+    setFilteredRows(filtered)
+  }
+
+  const handleFilterChange = (field, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value
+    }))
+  }
+
+  const resetFilters = () => {
+    setFilters({
+      gender: '',
+      candidateNumber: '',
+      judgeName: ''
+    })
+  }
 
   const fetchScoresData = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get('/api/scoring/pageant/view')
+      const { data } = await axios.get(`/api/scoring/pageant/view?competition=${competition}`)
 
       if (data.success) {
         const transformedRows = []
         const categoriesMap = new Map()
+        const judgesSet = new Set()
 
-        // First, collect all unique categories
         data.categories.forEach((category) => {
           categoriesMap.set(category.id, category.name)
         })
 
-        // Group data by candidate and judge
         const candidateJudgeMap = {}
 
         data.candidates.forEach((candidate) => {
           candidate.scores?.forEach((score) => {
             const key = `${candidate.id}-${score.judgeId}`
+            const judgeName = score.judge.username
+            judgesSet.add(judgeName)
 
             if (!candidateJudgeMap[key]) {
               candidateJudgeMap[key] = {
@@ -92,13 +87,13 @@ export default function ViewScoresTable() {
                 candidateNumber: candidate.candidateNumber,
                 candidateName: candidate.name,
                 course: candidate.course,
-                judgeName: score.judge.username,
+                gender: candidate.gender,
+                judgeName: judgeName,
                 categoryScores: {},
                 averageScore: score.averageScore
               }
             }
 
-            const categoryId = score.criteria.categoryId
             const categoryName = score.criteria.category.name
 
             if (!candidateJudgeMap[key].categoryScores[categoryName]) {
@@ -112,18 +107,19 @@ export default function ViewScoresTable() {
           })
         })
 
-        // Calculate category scores and build rows
+        setJudges(Array.from(judgesSet).sort())
+
         Object.values(candidateJudgeMap).forEach((item) => {
           const row = {
             id: item.id,
             candidateNumber: item.candidateNumber,
             candidateName: item.candidateName,
             course: item.course,
+            gender: item.gender,
             judgeName: item.judgeName,
             averageScore: item.averageScore?.toFixed(2) || '-'
           }
 
-          // Calculate score for each category
           Object.entries(item.categoryScores).forEach(([categoryName, scores]) => {
             let categoryScore = 0
             scores.forEach(({ score, percentage }) => {
@@ -137,7 +133,6 @@ export default function ViewScoresTable() {
 
         setRows(transformedRows)
 
-        // Build dynamic columns
         const dynamicColumns = [
           {
             field: 'candidateNumber',
@@ -159,6 +154,13 @@ export default function ViewScoresTable() {
             width: 150
           },
           {
+            field: 'gender',
+            headerName: 'Gender',
+            width: 100,
+            headerAlign: 'center',
+            align: 'center'
+          },
+          {
             field: 'judgeName',
             headerName: 'Judge Name',
             width: 150,
@@ -167,7 +169,6 @@ export default function ViewScoresTable() {
           }
         ]
 
-        // Add category columns
         const sortedCategories = Array.from(categoriesMap.values()).sort()
         sortedCategories.forEach((categoryName) => {
           dynamicColumns.push({
@@ -184,7 +185,6 @@ export default function ViewScoresTable() {
           })
         })
 
-        // Add total score column
         dynamicColumns.push({
           field: 'averageScore',
           headerName: 'Total Score',
@@ -210,20 +210,63 @@ export default function ViewScoresTable() {
   return (
     <div className='mt-6 flex flex-col items-center justify-center p-4'>
       <div className='w-full max-w-full px-4'>
-        <div className='h-[500px] w-full'>
-          <div className='flex justify-end mb-3 w-full'>
-            <button onClick={exportToExcel}>
-              <ShinyButton>Export to Excel</ShinyButton>
-            </button>
-          </div>
+        <Box className='mb-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow'>
+          <div className='flex flex-wrap gap-4 items-end'>
+            <FormControl size='small' style={{ minWidth: 150 }}>
+              <InputLabel>Gender</InputLabel>
+              <Select
+                value={filters.gender}
+                label='Gender'
+                onChange={(e) => handleFilterChange('gender', e.target.value)}
+              >
+                <MenuItem value=''>All</MenuItem>
+                <MenuItem value='MALE'>Male</MenuItem>
+                <MenuItem value='FEMALE'>Female</MenuItem>
+              </Select>
+            </FormControl>
 
+            <TextField
+              size='small'
+              label='Candidate Number'
+              value={filters.candidateNumber}
+              onChange={(e) => handleFilterChange('candidateNumber', e.target.value)}
+              style={{ minWidth: 150 }}
+            />
+
+            <FormControl size='small' style={{ minWidth: 200 }}>
+              <InputLabel>Judge Name</InputLabel>
+              <Select
+                value={filters.judgeName}
+                label='Judge Name'
+                onChange={(e) => handleFilterChange('judgeName', e.target.value)}
+              >
+                <MenuItem value=''>All Judges</MenuItem>
+                {judges.map((judge) => (
+                  <MenuItem key={judge} value={judge}>
+                    {judge}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <Button variant='outlined' size='small' onClick={resetFilters} startIcon={<FilterX size={16} />}>
+              Reset
+            </Button>
+
+            <div className='ml-auto'>
+              <ExcelExportButton competition={competition} filters={filters} disabled={filteredRows.length === 0} />
+            </div>
+          </div>
+        </Box>
+
+        <div className='h-[500px] w-full'>
           <DataGrid
-            rows={rows}
+            rows={filteredRows}
             columns={columns}
             loading={loading}
             pageSizeOptions={[10, 25, 50, 100]}
             initialState={{
-              pagination: { paginationModel: { pageSize: 25 } },
+              pagination: { paginationModel: { pageSize: 10 } },
               sorting: {
                 sortModel: [{ field: 'candidateNumber', sort: 'asc' }]
               }

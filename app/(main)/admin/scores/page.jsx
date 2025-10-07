@@ -3,9 +3,9 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { Chip } from '@mui/material'
 import ViewScoresTable from '@/app/modules/admin/ViewScoresTable'
-import Footer from '@/app/modules/common/Footer'
 import { ShinyButton } from '@/components/ui/shiny-button'
 import { COMPETITIONS_CHIPS } from '@/app/constants/main/constants'
+
 export default function AdminScores() {
   const [selectedCompetition, setSelectedCompetition] = useState('pageantry')
 
@@ -50,8 +50,6 @@ export default function AdminScores() {
 
         <ViewScoresTable competition={selectedCompetition} />
       </div>
-
-      <Footer />
     </div>
   )
 }
