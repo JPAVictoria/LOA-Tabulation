@@ -1,3 +1,5 @@
+import { Trophy, Flag, Music, Sparkles } from 'lucide-react'
+
 export const COMPETITION_DATA = [
   {
     title: 'Pageant College',
@@ -24,4 +26,11 @@ export const COMPETITION_DATA = [
     src: '/main/admin.jpg',
     link: '/admin'
   }
+]
+
+export const COMPETITIONS_CHIPS = [
+  { id: 'pageantry', label: 'Pageantry', icon: Sparkles },
+  { id: 'flag-twirling', label: 'Flag Twirling', icon: Flag },
+  { id: 'hiphop', label: 'Hip-Hop', icon: Music },
+  { id: 'singing', label: 'Singing', icon: Trophy }
 ]

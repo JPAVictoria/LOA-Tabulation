@@ -25,8 +25,13 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 p-25'>
-      <div className='max-w-6xl mx-auto'>
+    <div className='min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-8'>
+      <div className='absolute top-6 left-6'>
+        <Link href='/admin'>
+          <ShinyButton>Logout</ShinyButton>
+        </Link>
+      </div>
+      <div className='max-w-6xl mx-auto mt-20'>
         <div className='mb-8'>
           <h1
             className='bg-clip-text text-transparent text-center 
