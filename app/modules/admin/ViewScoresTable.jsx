@@ -9,7 +9,11 @@ import ExcelExportButton from './ExcelExportButton'
 export default function ViewScoresTable({ competition = 'pageantry' }) {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [columns, setColumns] = useState([])
+  const [columns, setColumns] = useState([
+    { field: 'candidateNumber', headerName: 'Candidate No.', width: 350 },
+    { field: 'candidateName', headerName: 'Candidate Name', width: 350 },
+    { field: 'course', headerName: 'Course', width: 350 }
+  ])
   const [judges, setJudges] = useState([])
   const [filters, setFilters] = useState({
     gender: '',
