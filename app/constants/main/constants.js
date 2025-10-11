@@ -22,6 +22,11 @@ export const COMPETITION_DATA = [
     link: '/hiphop'
   },
   {
+    title: 'Bench-Cheering',
+    src: '/main/bench-cheering-main.png',
+    link: '/bench-cheering'
+  },
+  {
     title: 'Admin Page',
     src: '/main/admin.jpg',
     link: '/admin'

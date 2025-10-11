@@ -29,6 +29,7 @@ enum CompetitionType {
   PAGEANTRY
   HIPHOP
   SINGING
+  BENCH_CHEERING
 }
 
 enum Level {

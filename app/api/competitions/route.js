@@ -6,7 +6,8 @@ export async function GET() {
       { id: 'FLAG_TWIRLING', name: 'FLAG_TWIRLING', displayName: 'Flag Twirling' },
       { id: 'PAGEANTRY', name: 'PAGEANTRY', displayName: 'Pageantry' },
       { id: 'HIPHOP', name: 'HIPHOP', displayName: 'Hiphop' },
-      { id: 'SINGING', name: 'SINGING', displayName: 'Singing' }
+      { id: 'SINGING', name: 'SINGING', displayName: 'Singing' },
+      { id: 'BENCH_CHEERING', name: 'BENCH_CHEERING', displayName: 'Bench Cheering' }
     ]
 
     return NextResponse.json({ success: true, competitions })
