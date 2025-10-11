@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
 import { useToast } from '@/app/context/ToastContext'
 import ScoringTable from '@/app/modules/common/ScoringTable'
-import PageantScoringModal from '@/app/modules/common/ScoringModal'
+import PageantScoringModal from '@/app/modules/pageant/ScoringModal'
 import Footer from '@/app/modules/common/Footer'
 import { ShinyButton } from '@/components/ui/shiny-button'
 
