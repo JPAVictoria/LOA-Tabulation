@@ -30,6 +30,8 @@ enum CompetitionType {
   HIPHOP
   SINGING
   BENCH_CHEERING
+  LITTLE_LYCEAN_STARS
+  LYCEAN_TEEN_MODEL
 }
 
 enum Level {

@@ -27,6 +27,16 @@ export const COMPETITION_DATA = [
     link: '/bench-cheering'
   },
   {
+    title: 'Little Lycean Star',
+    src: '/main/admin.jpg',
+    link: '/little-lycean-stars'
+  },
+  {
+    title: 'Lycean Teen Model',
+    src: '/main/admin.jpg',
+    link: '/lycean-teen-model'
+  },
+  {
     title: 'Admin Page',
     src: '/main/admin.jpg',
     link: '/admin'
