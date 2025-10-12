@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, User, Lock, Crown } from 'lucide-react'
+import Link from 'next/link'
 
 export default function LoginSection({ onSubmit, isLoading }) {
   const [showPassword, setShowPassword] = useState(false)
@@ -107,6 +108,14 @@ export default function LoginSection({ onSubmit, isLoading }) {
               'Sign In'
             )}
           </motion.button>
+          <div className='mt-5 text-center'>
+            <Link
+              href='/'
+              className='font-semibold text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-red-500 to-pink-400 dark:from-red-400 dark:via-red-300 dark:to-pink-200 hover:underline underline-offset-4 decoration-red-500 transition-all duration-300'
+            >
+              Back to selection
+            </Link>
+          </div>
         </motion.form>
       </motion.div>
     </div>

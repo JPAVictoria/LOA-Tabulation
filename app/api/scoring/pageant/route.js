@@ -103,11 +103,11 @@ export async function GET() {
         status = 'GRADED'
       }
 
-      // Calculate average score using Option A: Equal category weight
+      // Calculate average score with 30% weight per category (90% total, 10% reserved for manual scoring)
       let averageScore = null
       if (candidate.scores.length > 0) {
         // Group scores by category, then by criteria
-        // STEP 1: Group scores by category, then by criteria (Lines 100-118)
+        // STEP 1: Group scores by category, then by criteria
         const scoresByCategory = {}
         candidate.scores.forEach((score) => {
           const categoryId = score.criteria.categoryId
@@ -140,8 +140,9 @@ export async function GET() {
           categoryScores.push(categoryScore) // Store this category's score
         })
 
-        // STEP 3: Average all category scores
-        averageScore = categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
+        // STEP 3: Apply 30% weight to each category (90% total, 10% reserved for manual scoring)
+        const categoryWeight = 30 / 100
+        averageScore = categoryScores.reduce((sum, score) => sum + score * categoryWeight, 0)
       }
 
       return {

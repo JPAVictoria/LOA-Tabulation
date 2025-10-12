@@ -66,12 +66,12 @@ export default function PageantScoringPage() {
     <>
       {/* Sign Out Button */}
       <div className='fixed top-4 left-4 z-50'>
-        <button
+        <div
           onClick={handleSignOut}
           className='flex items-center gap-2 px-3 py-1.5 text-sm rounded-md transition-colors cursor-pointer'
         >
          <ShinyButton>Sign out</ShinyButton>
-        </button>
+        </div>
       </div>
 
       <ScoringTable
