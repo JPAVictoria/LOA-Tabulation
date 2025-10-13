@@ -6,6 +6,7 @@ import { Chip } from '@mui/material'
 import ViewScoresTable from '@/app/modules/admin/ViewScoresTable'
 import { ShinyButton } from '@/components/ui/shiny-button'
 import { COMPETITIONS_CHIPS } from '@/app/constants/main/constants'
+import PrintScoresButton from '@/app/modules/admin/PrintScoresButton'
 
 export default function AdminScores() {
   const [selectedCompetition, setSelectedCompetition] = useState('pageantry')
@@ -42,6 +43,7 @@ export default function AdminScores() {
         <Link href='/admin/compilation'>
           <ShinyButton>← Back</ShinyButton>
         </Link>
+        <PrintScoresButton />
       </div>
 
       {/* Main content */}
