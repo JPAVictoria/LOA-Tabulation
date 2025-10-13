@@ -14,7 +14,7 @@ export default function ExcelExportButton({ competition, filters, disabled = fal
 
       // Make API request with filters
       const response = await axios.post(
-        '/api/scoring/pageant/export',
+        '/api/scoring/export',
         {
           competition,
           filters

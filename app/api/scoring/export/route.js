@@ -1,4 +1,4 @@
-// app/api/scoring/pageant/export/route.js
+// app/api/scoring/export/route.js
 import { NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 import * as XLSX from 'xlsx'

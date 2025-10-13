@@ -1,15 +1,18 @@
-// app/api/scoring/pageant/view/route.js
+// app/api/scoring/view/route.js
 import { NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(request) {
   try {
-    // Fetch all PAGEANTRY candidates with their scores
+    const { searchParams } = new URL(request.url)
+    const competition = searchParams.get('competition')?.toUpperCase() || 'PAGEANTRY'
+
+    // Fetch candidates with their scores
     const candidates = await prisma.candidate.findMany({
       where: {
-        competition: 'PAGEANTRY',
+        competition,
         deleted: false
       },
       select: {
@@ -56,10 +59,10 @@ export async function GET() {
       }
     })
 
-    // Get all categories for PAGEANTRY
+    // Get all categories for the competition
     const categories = await prisma.category.findMany({
       where: {
-        competition: 'PAGEANTRY',
+        competition,
         deleted: false
       },
       include: {
@@ -71,9 +74,7 @@ export async function GET() {
       }
     })
 
-    const totalCriteria = categories.reduce((sum, cat) => sum + cat.criteria.length, 0)
-
-    // Transform data - calculate score PER JUDGE (NO averaging across judges)
+    // Calculate scores per judge
     const candidatesWithAverages = candidates.map((candidate) => {
       if (candidate.scores.length === 0) {
         return {
@@ -82,7 +83,6 @@ export async function GET() {
         }
       }
 
-      // Group scores by JUDGE first, then by category, then by criteria
       const scoresByJudge = {}
       candidate.scores.forEach((score) => {
         const judgeId = score.judgeId
@@ -102,29 +102,22 @@ export async function GET() {
         }
       })
 
-      // Calculate score for each judge separately
       Object.keys(scoresByJudge).forEach((judgeId) => {
         const judgeCategories = scoresByJudge[judgeId]
-
-        // Calculate weighted score for each category
         const categoryScores = []
+
         Object.values(judgeCategories).forEach((criteriasInCategory) => {
           let categoryScore = 0
-
-          // For each criteria: score × (percentage / 100)
           Object.values(criteriasInCategory).forEach(({ score, percentage }) => {
             categoryScore += (score * percentage) / 100
           })
-
           categoryScores.push(categoryScore)
         })
 
-        // Average all category scores: Σ(categoryScores) / number of categories
         scoresByJudge[judgeId].averageScore =
           categoryScores.reduce((sum, score) => sum + score, 0) / categoryScores.length
       })
 
-      // Attach the judge-specific average to each score
       const scoresWithAverage = candidate.scores.map((score) => ({
         ...score,
         averageScore: scoresByJudge[score.judgeId].averageScore
@@ -140,10 +133,10 @@ export async function GET() {
       success: true,
       candidates: candidatesWithAverages,
       categories,
-      totalCriteria
+      competition
     })
   } catch (error) {
-    console.error('Error fetching pageant scores view:', error)
+    console.error('Error fetching scores view:', error)
     return NextResponse.json({ success: false, error: 'Failed to fetch scores' }, { status: 500 })
   } finally {
     await prisma.$disconnect()

@@ -1,6 +1,7 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import axios from 'axios'
 import { Chip } from '@mui/material'
 import ViewScoresTable from '@/app/modules/admin/ViewScoresTable'
 import { ShinyButton } from '@/components/ui/shiny-button'
@@ -8,6 +9,27 @@ import { COMPETITIONS_CHIPS } from '@/app/constants/main/constants'
 
 export default function AdminScores() {
   const [selectedCompetition, setSelectedCompetition] = useState('pageantry')
+  const [scoresData, setScoresData] = useState(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    fetchScoresData()
+  }, [selectedCompetition])
+
+  const fetchScoresData = async () => {
+    try {
+      setLoading(true)
+      const { data } = await axios.get(`/api/scoring/view?competition=${selectedCompetition}`)
+
+      if (data.success) {
+        setScoresData(data)
+      }
+    } catch (error) {
+      console.error('Error fetching scores:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleChipClick = (competitionId) => {
     setSelectedCompetition(competitionId)
@@ -48,7 +70,7 @@ export default function AdminScores() {
           })}
         </div>
 
-        <ViewScoresTable competition={selectedCompetition} />
+        <ViewScoresTable data={scoresData} competition={selectedCompetition} loading={loading} />
       </div>
     </div>
   )

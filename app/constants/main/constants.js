@@ -1,4 +1,4 @@
-import { Trophy, Flag, Music, Sparkles } from 'lucide-react'
+import { Trophy, Flag, Music, Sparkles, Users, Star } from 'lucide-react'
 
 export const COMPETITION_DATA = [
   {
@@ -45,7 +45,10 @@ export const COMPETITION_DATA = [
 
 export const COMPETITIONS_CHIPS = [
   { id: 'pageantry', label: 'Pageantry', icon: Sparkles },
-  { id: 'flag-twirling', label: 'Flag Twirling', icon: Flag },
+  { id: 'flag_twirling', label: 'Flag Twirling', icon: Flag },
   { id: 'hiphop', label: 'Hip-Hop', icon: Music },
-  { id: 'singing', label: 'Singing', icon: Trophy }
+  { id: 'singing', label: 'Singing', icon: Trophy },
+  { id: 'bench_cheering', label: 'Bench Cheering', icon: Users },
+  { id: 'little_lycean_stars', label: 'Little Lycean Stars', icon: Star },
+  { id: 'lycean_teen_model', label: 'Lycean Teen Model', icon: Sparkles }
 ]
