@@ -8,10 +8,11 @@ import CandidateModal from '@/app/modules/admin/CandidateModal'
 import JudgeModal from '@/app/modules/admin/JudgeModal'
 import Link from 'next/link'
 import { ShinyButton } from '@/components/ui/shiny-button'
+import { useRouter } from 'next/navigation'
 
 export default function AdminDashboard() {
   const [activeModal, setActiveModal] = useState(null)
-
+  const router = useRouter()
   const handleButtonClick = (itemId) => {
     setActiveModal(itemId)
   }
@@ -24,12 +25,14 @@ export default function AdminDashboard() {
     setActiveModal(null)
   }
 
+  const handleLogout = () => {
+    localStorage.clear()
+    router.push('/admin')
+  }
   return (
     <div className='min-h-screen bg-gray-50 dark:bg-gray-900 p-6 md:p-8'>
-      <div className='absolute top-6 left-6'>
-        <Link href='/admin'>
-          <ShinyButton>Logout</ShinyButton>
-        </Link>
+      <div onClick={handleLogout} className='absolute top-6 left-6'>
+        <ShinyButton>Logout</ShinyButton>
       </div>
       <div className='max-w-6xl mx-auto mt-20'>
         <div className='mb-8'>
