@@ -91,8 +91,21 @@ export async function POST(request) {
       }
     })
 
+    // Filter out categories with no criteria
+    const validCategories = categories.filter((cat) => cat.criteria.length > 0)
+
+    if (validCategories.length === 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'No valid categories with criteria found'
+        },
+        { status: 400 }
+      )
+    }
+
     const criteriaByCategory = {}
-    categories.forEach((category) => {
+    validCategories.forEach((category) => {
       criteriaByCategory[category.id] = category.criteria
     })
 
@@ -126,7 +139,7 @@ export async function POST(request) {
     })
 
     Object.values(candidateJudgeMap).forEach((item) => {
-      categories.forEach((category) => {
+      validCategories.forEach((category) => {
         const criteriaInCategory = criteriaByCategory[category.id]
         let categoryScore = 0
         let hasScores = false
@@ -161,7 +174,7 @@ export async function POST(request) {
     let colIndex = 7
 
     // Add criteria columns
-    categories.forEach((category) => {
+    validCategories.forEach((category) => {
       category.criteria.forEach((criteria) => {
         columns.push({
           key: `criteria_${criteria.id}`,
@@ -172,7 +185,7 @@ export async function POST(request) {
     })
 
     // Add category total columns
-    categories.forEach((category) => {
+    validCategories.forEach((category) => {
       columns.push({
         key: `total_${category.id}`,
         width: 15
@@ -190,9 +203,12 @@ export async function POST(request) {
       '',
       '',
       '',
-      ...categories.flatMap((cat) => [cat.name.toUpperCase(), ...Array(cat.criteria.length - 1).fill(''), '']),
+      ...validCategories.flatMap((cat) => {
+        const fillCount = Math.max(0, cat.criteria.length - 1)
+        return [cat.name.toUpperCase(), ...Array(fillCount).fill(''), '']
+      }),
       'CATEGORY TOTALS',
-      ...Array(categories.length - 1).fill('')
+      ...Array(Math.max(0, validCategories.length - 1)).fill('')
     ])
 
     // Style first header row
@@ -210,7 +226,7 @@ export async function POST(request) {
     worksheet.mergeCells(1, 1, 1, 6) // CANDIDATE INFORMATION
     currentCol = 8
 
-    categories.forEach((category) => {
+    validCategories.forEach((category) => {
       const criteriaCount = category.criteria.length
       if (criteriaCount > 1) {
         worksheet.mergeCells(1, currentCol, 1, currentCol + criteriaCount - 1)
@@ -218,7 +234,7 @@ export async function POST(request) {
       currentCol += criteriaCount + 1
     })
 
-    worksheet.mergeCells(1, currentCol, 1, currentCol + categories.length - 1) // CATEGORY TOTALS
+    worksheet.mergeCells(1, currentCol, 1, currentCol + validCategories.length - 1) // CATEGORY TOTALS
 
     // Add second header row (column names)
     const headerRow2Data = [
@@ -229,8 +245,8 @@ export async function POST(request) {
       'Level',
       'Judge',
       '',
-      ...categories.flatMap((cat) => [...cat.criteria.map((c) => c.name), '']),
-      ...categories.map((cat) => cat.name)
+      ...validCategories.flatMap((cat) => [...cat.criteria.map((c) => c.name), '']),
+      ...validCategories.map((cat) => cat.name)
     ]
 
     const headerRow2 = worksheet.addRow(headerRow2Data)
@@ -256,14 +272,14 @@ export async function POST(request) {
         item.level,
         item.judgeName,
         '', // Empty separator
-        ...categories.flatMap((category) => [
+        ...validCategories.flatMap((category) => [
           ...category.criteria.map((criteria) => {
             const criteriaScore = item.criteriaScores[criteria.id]
             return criteriaScore ? parseFloat(criteriaScore.score.toFixed(2)) : null
           }),
           '' // Empty separator
         ]),
-        ...categories.map((category) => {
+        ...validCategories.map((category) => {
           const categoryScore = item.categoryScores[category.name]
           return categoryScore ? parseFloat(categoryScore.toFixed(2)) : null
         })
