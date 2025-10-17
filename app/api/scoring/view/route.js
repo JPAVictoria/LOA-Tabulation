@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
-    const competition = searchParams.get('competition')?.toUpperCase() || 'PAGEANTRY'
+    const competition = searchParams.get('competition')?.toUpperCase() || 'FLAG_TWIRLING'
 
     // Fetch candidates with their scores
     const candidates = await prisma.candidate.findMany({

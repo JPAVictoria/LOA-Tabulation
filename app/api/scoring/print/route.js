@@ -111,7 +111,8 @@ export async function GET(request) {
           finalScore += (avgScore * percentage) / 100
         })
 
-        averageScore = finalScore
+        // Round to 2 decimal places
+        averageScore = Math.round(finalScore * 100) / 100
       }
 
       return {

@@ -3,8 +3,17 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
+
+export async function GET(request) {
   try {
+    // Get judgeId from query parameters
+    const { searchParams } = new URL(request.url)
+    const judgeId = searchParams.get('judgeId')
+
+    if (!judgeId) {
+      return NextResponse.json({ success: false, error: 'Judge ID is required' }, { status: 400 })
+    }
+
     // Fetch all BENCH_CHEERING candidates
     const candidates = await prisma.candidate.findMany({
       where: {
@@ -20,7 +29,8 @@ export async function GET() {
         level: true,
         scores: {
           where: {
-            deleted: false
+            deleted: false,
+            judgeId: parseInt(judgeId) // Filter scores by logged-in judge
           },
           select: {
             id: true,
@@ -66,33 +76,19 @@ export async function GET() {
 
     const totalCriteria = criteria.length
 
-    // Transform data to include scoring status and average score
+    // Transform data to include scoring status and average score for the logged-in judge
     const candidatesWithStatus = candidates.map((candidate) => {
-      // Group scores by judge
-      const scoresByJudge = candidate.scores.reduce((acc, score) => {
-        if (!acc[score.judgeId]) {
-          acc[score.judgeId] = []
-        }
-        acc[score.judgeId].push(score)
-        return acc
-      }, {})
-
-      // A judge has fully scored if they have scores for all criteria
-      const judgesWhoFullyScored = Object.entries(scoresByJudge)
-        .filter(([_, scores]) => scores.length === totalCriteria)
-        .map(([judgeId, _]) => parseInt(judgeId))
-
-      const totalJudges = assignedJudges.length
-      const scoredCount = judgesWhoFullyScored.length
+      // Check if the logged-in judge has scored all criteria
+      const judgeHasScored = candidate.scores.length === totalCriteria
 
       let status = 'NOT_GRADED'
-      if (scoredCount > 0 && scoredCount < totalJudges) {
-        status = 'PENDING'
-      } else if (scoredCount === totalJudges && totalJudges > 0) {
+      if (judgeHasScored) {
         status = 'GRADED'
+      } else if (candidate.scores.length > 0) {
+        status = 'PENDING'
       }
 
-      // Calculate average score for BENCH_CHEERING (single category with weighted criteria)
+      // Calculate average score for this judge only
       let averageScore = null
       if (candidate.scores.length > 0) {
         // Group scores by criteria
@@ -100,18 +96,16 @@ export async function GET() {
         candidate.scores.forEach((score) => {
           if (!scoresByCriteria[score.criteriaId]) {
             scoresByCriteria[score.criteriaId] = {
-              scores: [],
+              score: parseFloat(score.score),
               percentage: parseFloat(score.criteria.percentage)
             }
           }
-          scoresByCriteria[score.criteriaId].scores.push(parseFloat(score.score))
         })
 
         // Calculate weighted sum
         let finalScore = 0
-        Object.values(scoresByCriteria).forEach(({ scores, percentage }) => {
-          const avgScore = scores.reduce((sum, s) => sum + s, 0) / scores.length
-          finalScore += (avgScore * percentage) / 100
+        Object.values(scoresByCriteria).forEach(({ score, percentage }) => {
+          finalScore += (score * percentage) / 100
         })
 
         averageScore = finalScore
@@ -124,9 +118,8 @@ export async function GET() {
         gender: candidate.gender,
         course: candidate.course,
         level: candidate.level,
-        judgesWhoScored: judgesWhoFullyScored,
-        totalJudges,
-        scoredCount,
+        scoredCount: judgeHasScored ? 1 : 0,
+        totalJudges: 1, // Only showing for this judge
         status,
         averageScore
       }
@@ -136,7 +129,7 @@ export async function GET() {
       success: true,
       candidates: candidatesWithStatus,
       assignedJudges,
-      totalJudges: assignedJudges.length,
+      totalJudges: 1, // Only this judge
       totalCriteria
     })
   } catch (error) {
@@ -146,7 +139,6 @@ export async function GET() {
     await prisma.$disconnect()
   }
 }
-
 export async function POST(request) {
   try {
     const { judgeId, candidateId, scores } = await request.json()

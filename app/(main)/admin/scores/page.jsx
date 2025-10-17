@@ -9,7 +9,7 @@ import { COMPETITIONS_CHIPS } from '@/app/constants/main/constants'
 import PrintScoresButton from '@/app/modules/admin/PrintScoresButton'
 
 export default function AdminScores() {
-  const [selectedCompetition, setSelectedCompetition] = useState('pageantry')
+  const [selectedCompetition, setSelectedCompetition] = useState('flag_twirling')
   const [scoresData, setScoresData] = useState(null)
   const [loading, setLoading] = useState(true)
 

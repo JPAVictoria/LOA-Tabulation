@@ -10,8 +10,6 @@ import { ShinyButton } from '@/components/ui/shiny-button'
 
 export default function HipHopScoringPage() {
   const [candidates, setCandidates] = useState([])
-  const [assignedJudges, setAssignedJudges] = useState([])
-  const [totalJudges, setTotalJudges] = useState(0)
   const [loading, setLoading] = useState(true)
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedCandidateId, setSelectedCandidateId] = useState(null)
@@ -21,12 +19,18 @@ export default function HipHopScoringPage() {
   const fetchCandidates = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get('/api/scoring/hiphop')
+      const judgeId = localStorage.getItem('judgeId')
+
+      if (!judgeId) {
+        showToast('Judge ID not found. Please login again.', 'error')
+        router.push('/hiphop')
+        return
+      }
+
+      const { data } = await axios.get(`/api/scoring/hiphop?judgeId=${judgeId}`)
 
       if (data.success) {
         setCandidates(data.candidates)
-        setAssignedJudges(data.assignedJudges)
-        setTotalJudges(data.totalJudges)
       } else {
         showToast('Failed to fetch candidates', 'error')
       }
@@ -73,13 +77,7 @@ export default function HipHopScoringPage() {
         </div>
       </div>
 
-      <ScoringTable
-        candidates={candidates}
-        assignedJudges={assignedJudges}
-        totalJudges={totalJudges}
-        loading={loading}
-        onGrade={handleGrade}
-      />
+      <ScoringTable candidates={candidates} loading={loading} onGrade={handleGrade} />
 
       <HipHopScoringModal
         open={modalOpen}

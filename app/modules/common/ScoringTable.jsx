@@ -4,9 +4,18 @@ import { DataGrid } from '@mui/x-data-grid'
 import { Chip } from '@mui/material'
 import { Pen } from 'lucide-react'
 
-export default function ScoringTable({ candidates, assignedJudges, totalJudges, loading, onGrade }) {
+export default function ScoringTable({ candidates, loading, onGrade }) {
   const [filteredCandidates, setFilteredCandidates] = useState([])
   const [selectedGender, setSelectedGender] = useState(null)
+  const [judgeName, setJudgeName] = useState('')
+
+  useEffect(() => {
+    // Get judge name from localStorage
+    const name = localStorage.getItem('judgeName')
+    if (name) {
+      setJudgeName(name)
+    }
+  }, [])
 
   useEffect(() => {
     if (selectedGender) {
@@ -41,39 +50,11 @@ export default function ScoringTable({ candidates, assignedJudges, totalJudges, 
       headerAlign: 'center',
       align: 'center'
     },
-
     {
       field: 'name',
       headerName: 'Candidate Name',
       flex: 1,
       minWidth: 150
-    },
-    {
-      field: 'judgesScored',
-      headerName: 'Judges',
-      width: 200,
-      headerAlign: 'center',
-      align: 'center',
-      sortable: false,
-      renderCell: ({ row }) => (
-        <div className='flex items-center justify-center gap-1 h-full'>
-          {Array.from({ length: totalJudges }).map((_, index) => {
-            const judgeScored = index < row.scoredCount
-            return (
-              <div
-                key={index}
-                className={`w-3 h-3 rounded-full transition-all ${
-                  judgeScored ? 'bg-green-500 dark:bg-green-400 shadow-lg' : 'bg-gray-300 dark:bg-gray-600'
-                }`}
-                title={judgeScored ? `Judge ${index + 1} scored` : `Judge ${index + 1} not scored`}
-              />
-            )
-          })}
-          <span className='ml-2 text-sm text-gray-600 dark:text-gray-400'>
-            {row.scoredCount}/{totalJudges}
-          </span>
-        </div>
-      )
     },
     {
       field: 'status',
@@ -158,15 +139,12 @@ export default function ScoringTable({ candidates, assignedJudges, totalJudges, 
           )}
         </div>
 
-        {/* Judge Legend */}
-        {totalJudges > 0 && (
-          <div className='mb-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg'>
-            <p className='text-sm font-medium mb-2'>Assigned Judges ({totalJudges}):</p>
-            <div className='flex flex-wrap gap-2'>
-              {assignedJudges.map((judge) => (
-                <Chip key={judge.id} label={judge.username} size='small' variant='outlined' />
-              ))}
-            </div>
+        {/* Welcome Message */}
+        {judgeName && (
+          <div className='mt-5 mb-6 p-4'>
+            <p className='text-3xl font-bold text-gray-800 dark:text-gray-100'>
+              Welcome, <span className='text-blue-600 dark:text-blue-400'>{judgeName}</span>
+            </p>
           </div>
         )}
 

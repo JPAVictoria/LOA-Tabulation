@@ -21,7 +21,15 @@ export default function FlagTwirlingScoringPage() {
   const fetchCandidates = async () => {
     try {
       setLoading(true)
-      const { data } = await axios.get('/api/scoring/flag-twirling')
+      const judgeId = localStorage.getItem('judgeId')
+
+      if (!judgeId) {
+        showToast('Judge ID not found. Please login again.', 'error')
+        router.push('/flag-twirling')
+        return
+      }
+
+      const { data } = await axios.get(`/api/scoring/flag-twirling?judgeId=${judgeId}`)
 
       if (data.success) {
         setCandidates(data.candidates)
