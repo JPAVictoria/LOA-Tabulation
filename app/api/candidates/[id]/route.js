@@ -66,6 +66,7 @@ export async function PUT(request, { params }) {
       where: {
         candidateNumber,
         competition,
+        level,
         deleted: false,
         id: { not: candidateId }
       }
