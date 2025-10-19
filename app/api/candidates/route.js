@@ -23,6 +23,7 @@ export async function POST(request) {
       where: {
         candidateNumber: parseInt(candidateNumber),
         competition,
+        level,
         deleted: false
       }
     })
