@@ -45,7 +45,7 @@ export default function PrintScoresButton() {
       if (data.success) {
         setPrintData({
           competition,
-          candidates: data.candidates,
+          candidatesByLevel: data.candidatesByLevel,
           judges: data.assignedJudges
         })
 
@@ -110,7 +110,7 @@ export default function PrintScoresButton() {
           <div ref={printRef}>
             <PrintForm
               competition={printData.competition}
-              candidates={printData.candidates}
+              candidatesByLevel={printData.candidatesByLevel}
               judges={printData.judges}
             />
           </div>

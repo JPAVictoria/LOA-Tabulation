@@ -85,8 +85,6 @@ export async function GET(request) {
       }
     })
 
-    const totalCriteria = criteria.length
-
     // Transform data to include average scores
     const candidatesWithScores = candidates.map((candidate) => {
       // Calculate average score (weighted by criteria percentage)
@@ -126,9 +124,16 @@ export async function GET(request) {
       }
     })
 
+    // Group candidates by level
+    const candidatesByLevel = {
+      COLLEGE: candidatesWithScores.filter((c) => c.level === 'COLLEGE'),
+      SENIOR_HIGH: candidatesWithScores.filter((c) => c.level === 'SENIOR_HIGH'),
+      BASIC_EDUCATION: candidatesWithScores.filter((c) => c.level === 'BASIC_EDUCATION')
+    }
+
     return NextResponse.json({
       success: true,
-      candidates: candidatesWithScores,
+      candidatesByLevel,
       assignedJudges,
       competition: competitionType
     })
