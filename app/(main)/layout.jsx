@@ -11,7 +11,7 @@ const inter = Inter({
 })
 
 const MainLayout = ({ children }) => {
-  const { showBackdrop, resetTimer } = useBackdrop(3000)
+  const { showBackdrop, resetTimer } = useBackdrop(5000)
 
   return (
     <div className={`flex-1 flex flex-col ${inter.variable} antialiased`}>
